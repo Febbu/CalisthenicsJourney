@@ -1,32 +1,23 @@
-//
-//  CalisthenicsJourneyApp.swift
-//  CalisthenicsJourney
-//
-//  Created by Pierre Süßmuth on 8/20/26.
-//
-
 import SwiftUI
 import SwiftData
 
 @main
 struct CalisthenicsJourneyApp: App {
-    var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            Item.self,
-        ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-
-        do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
-        } catch {
-            fatalError("Could not create ModelContainer: \(error)")
-        }
-    }()
-
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            RootTabView()
         }
-        .modelContainer(sharedModelContainer)
+        .modelContainer(for: [
+            Exercise.self,
+            WorkoutTemplate.self,
+            WorkoutTemplateExercise.self,
+            WorkoutSession.self,
+            ExerciseLog.self,
+            SetLog.self,
+            JourneyLevel.self,
+            LevelRequirement.self,
+            Skill.self,
+            SkillStage.self
+        ])
     }
 }
