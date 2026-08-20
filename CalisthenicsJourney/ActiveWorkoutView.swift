@@ -63,6 +63,8 @@ private struct ExerciseEntryView: View {
     let previousLog: ExerciseLog?
     let isLast: Bool
     let onNext: () -> Void
+    
+    @FocusState private var inputIsFocused: Bool
 
     var body: some View {
         ScrollView {
@@ -84,7 +86,8 @@ private struct ExerciseEntryView: View {
                     SetEntryCard(
                         set: set,
                         previous: previousLog?.sets.first(where: { $0.setNumber == set.setNumber }),
-                        metric: log.metric
+                        metric: log.metric,
+                        inputIsFocused: $inputIsFocused
                     )
                 }
 
@@ -98,6 +101,15 @@ private struct ExerciseEntryView: View {
             }
             .padding()
         }
+        .toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+
+                Button("Done") {
+                    inputIsFocused = false
+                }
+            }
+        }
     }
 }
 
@@ -105,8 +117,7 @@ private struct SetEntryCard: View {
     @Bindable var set: SetLog
     let previous: SetLog?
     let metric: ExerciseMetric
-    
-    @FocusState private var inputIsFocused: Bool
+    let inputIsFocused: FocusState<Bool>.Binding
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -134,7 +145,7 @@ private struct SetEntryCard: View {
 
                     TextField("reps", value: $set.reps, format: .number)
                         .keyboardType(.numberPad)
-                        .focused($inputIsFocused)
+                        .focused(inputIsFocused)
                         .textFieldStyle(.roundedBorder)
                 }
 
@@ -146,7 +157,7 @@ private struct SetEntryCard: View {
 
                     TextField("sec", value: $set.seconds, format: .number)
                         .keyboardType(.numberPad)
-                        .focused($inputIsFocused)
+                        .focused(inputIsFocused)
                         .textFieldStyle(.roundedBorder)
                 }
 
@@ -159,7 +170,7 @@ private struct SetEntryCard: View {
 
                         TextField("lb", value: $set.weight, format: .number)
                             .keyboardType(.decimalPad)
-                            .focused($inputIsFocused)
+                            .focused(inputIsFocused)
                             .textFieldStyle(.roundedBorder)
                     }
 
@@ -170,7 +181,7 @@ private struct SetEntryCard: View {
 
                         TextField("reps", value: $set.reps, format: .number)
                             .keyboardType(.numberPad)
-                            .focused($inputIsFocused)
+                            .focused(inputIsFocused)
                             .textFieldStyle(.roundedBorder)
                     }
                 }
@@ -179,15 +190,7 @@ private struct SetEntryCard: View {
         }
         .padding()
         .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 18))
-        .toolbar {
-            ToolbarItemGroup(placement: .keyboard) {
-                Spacer()
-
-                Button("Done") {
-                    inputIsFocused = false
-                }
-            }
-        }
+        
     }
 
     private func previousText(_ previous: SetLog) -> String {
