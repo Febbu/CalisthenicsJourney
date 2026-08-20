@@ -83,7 +83,8 @@ private struct ExerciseEntryView: View {
                 ForEach(log.sets.sorted(by: { $0.setNumber < $1.setNumber })) { set in
                     SetEntryCard(
                         set: set,
-                        previous: previousLog?.sets.first(where: { $0.setNumber == set.setNumber })
+                        previous: previousLog?.sets.first(where: { $0.setNumber == set.setNumber }),
+                        metric: log.metric
                     )
                 }
 
@@ -103,6 +104,7 @@ private struct ExerciseEntryView: View {
 private struct SetEntryCard: View {
     @Bindable var set: SetLog
     let previous: SetLog?
+    let metric: ExerciseMetric
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -120,34 +122,54 @@ private struct SetEntryCard: View {
                 .foregroundStyle(.secondary)
             }
 
-            HStack(spacing: 12) {
-                VStack(alignment: .leading) {
-                    Text("Weight")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    TextField("lb", value: $set.weight, format: .number)
-                        .keyboardType(.decimalPad)
-                        .textFieldStyle(.roundedBorder)
-                }
+            switch metric {
 
+            case .reps:
                 VStack(alignment: .leading) {
                     Text("Reps")
                         .font(.caption)
                         .foregroundStyle(.secondary)
+
                     TextField("reps", value: $set.reps, format: .number)
                         .keyboardType(.numberPad)
                         .textFieldStyle(.roundedBorder)
                 }
 
+            case .seconds:
                 VStack(alignment: .leading) {
                     Text("Seconds")
                         .font(.caption)
                         .foregroundStyle(.secondary)
+
                     TextField("sec", value: $set.seconds, format: .number)
                         .keyboardType(.numberPad)
                         .textFieldStyle(.roundedBorder)
                 }
+
+            case .weightAndReps:
+                HStack(spacing: 12) {
+                    VStack(alignment: .leading) {
+                        Text("Weight")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+
+                        TextField("lb", value: $set.weight, format: .number)
+                            .keyboardType(.decimalPad)
+                            .textFieldStyle(.roundedBorder)
+                    }
+
+                    VStack(alignment: .leading) {
+                        Text("Reps")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+
+                        TextField("reps", value: $set.reps, format: .number)
+                            .keyboardType(.numberPad)
+                            .textFieldStyle(.roundedBorder)
+                    }
+                }
             }
+
         }
         .padding()
         .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 18))

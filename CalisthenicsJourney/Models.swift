@@ -100,6 +100,13 @@ final class ExerciseLog {
     @Attribute(.unique) var id: UUID
     var exerciseID: UUID
     var exerciseName: String
+    var metricRaw: String = ExerciseMetric.reps.rawValue
+
+    var metric: ExerciseMetric {
+        get { ExerciseMetric(rawValue: metricRaw) ?? .reps }
+        set { metricRaw = newValue.rawValue }
+    }
+
     var orderIndex: Int
     var session: WorkoutSession?
 
@@ -110,6 +117,7 @@ final class ExerciseLog {
         self.id = UUID()
         self.exerciseID = exercise.id
         self.exerciseName = exercise.name
+        self.metricRaw = exercise.metric.rawValue
         self.orderIndex = orderIndex
         self.session = session
     }
