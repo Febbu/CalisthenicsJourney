@@ -273,7 +273,15 @@ It should eventually contain data such as:
 -   display name;
 -   tracking configuration;
 -   semantic category if useful;
+-   equipment requirements where relevant;
+-   progression guidance where relevant;
 -   creation/update timestamps.
+
+Progression guidance should describe how the exercise is normally trained
+without tying behavior to its name. Examples may include rep-range/double
+progression, duration progression, controlled eccentric work, or a harder
+variation. Keep this representation small and add new progression types
+only when the product needs them.
 
 It should **not** contain UI-specific state.
 
@@ -725,8 +733,25 @@ Inputs may include:
 -   exercises linked to those stages;
 -   overall JourneyLevel;
 -   general foundation exercises;
+-   available equipment;
 -   user overrides/preferences;
 -   later recovery/frequency information.
+
+Product constraints for generation:
+
+-   no more than 3 active skills;
+-   no more than 8 exercises in a generated workout;
+-   target a practical workout duration of roughly 30–40 minutes;
+-   prefer useful exercise overlap when multiple skills need similar work;
+-   adapt supporting exercises to available equipment without changing the
+    underlying skill mastery requirement.
+
+Equipment should be modeled as data (for example, pull-up bar, resistance
+band, dumbbell, cable machine) rather than inferred from exercise names.
+A supporting exercise may declare one or more equipment requirements.
+The generator may choose an appropriate alternative route when one exists;
+it must not invent a false equivalent when a skill stage genuinely needs
+specific equipment.
 
 Output:
 
@@ -1424,6 +1449,10 @@ Unless the project owner explicitly changes them:
     energy-conscious.
 -   Core screens and workout entry must not require network access or
     heavy background computation.
+-   Workout generation must respect active-skill, exercise-count, duration,
+    and equipment constraints from product rules.
+-   Equipment changes the available training route, not the identity or
+    mastery standard of a skill.
 
 ------------------------------------------------------------------------
 
@@ -1445,6 +1474,8 @@ Before implementing a structural change, confirm:
 -   Does this add unnecessary startup work, background activity, or broad
     data loading?
 -   If this is an optimization, was the bottleneck measured first?
+-   Does workout-generation logic respect available equipment without
+    hardcoding exercise names or inventing misleading substitutions?
 
 If a proposed change violates an invariant, stop and ask the project
 owner.

@@ -216,15 +216,42 @@ becomes the previous result next time.
 For rep-range strength work, the intended foundation is double
 progression.
 
+The goal is gradual improvement, not maximal effort on every set. Users
+should be encouraged to start with a comfortable load or variation,
+leave some good reps in reserve, and let the first real workout establish
+their practical baseline.
+
+For typical supporting strength exercises, **8–12 reps is the default
+starting range** unless the exercise or training purpose calls for a
+different prescription. This is a default, not a universal rule.
+
+The user should choose a resistance that allows controlled reps without
+maximal effort. The first workout establishes a practical baseline.
+Future workouts should aim for gradual improvement within the prescribed
+range.
+
 Example: Shoulder Press `3 × 8–12`.
 
 `10/9/8 → 11/10/9 → 12/11/10 → 12/12/12`
 
-Once the target is mastered with appropriate form/effort, weight can
-increase and reps can fall toward the lower end.
+For a typical `3 × 8–12` double-progression exercise, reaching the top
+of the range across all prescribed sets with appropriate form and effort
+(e.g. `12/12/12`) is the signal to increase resistance or difficulty.
+Reps may then fall back toward the lower end of the range and build
+upward again.
+
+Not every exercise should use `8–12`. Skill practice, isometric holds,
+controlled eccentrics, technique work, and other exercise types may use
+different progression methods appropriate to their purpose.
+
+Training prescriptions answer **how to improve**; mastery requirements
+answer **what ability has been proven**. Normal workout results may
+satisfy mastery requirements automatically, but workouts should not
+become constant max-effort tests.
 
 The app may recommend progression later, but recommendations never
-override actual logged performance.
+override actual logged performance. Introductory guidance should be
+contextual and concise rather than repeatedly interrupting every workout.
 
 ## 13. Workout generation and control
 
@@ -234,7 +261,22 @@ Generated workouts should be assembled from:
 2.  exercises required to progress those stages;
 3.  relevant general foundation work;
 4.  current overall level where appropriate;
-5.  recovery/frequency rules if implemented later.
+5.  available equipment;
+6.  recovery/frequency rules if implemented later.
+
+A user may have at most **3 active skills** at a time. Skills may be
+deactivated and reactivated without losing earned progress.
+
+Generated workouts should normally fit within about **30–40 minutes** and
+must not exceed **8 exercises**. When multiple active skills benefit from
+the same exercise or training quality, the generator should prefer useful
+overlap rather than simply stacking separate exercise lists.
+
+Equipment availability changes the **training route**, not the underlying
+skill goal or mastery standard. The app may choose different supporting
+exercises for gym, home, bands, pull-up bars, or other available equipment.
+Do not invent misleading substitutes when a stage genuinely requires
+specific equipment.
 
 Generated workouts remain editable. The user should ultimately be able
 to add/remove/reorder/replace exercises, alter sets and ranges, and
