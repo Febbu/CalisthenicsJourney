@@ -23,9 +23,8 @@ game clutter**.
 The game is the user's real physical progression.
 
 The rewarding moments are mastering movements, completing skill-tree
-stages, unlocking harder progressions, meeting level requirements,
-watching workouts evolve as ability improves, and seeing completed
-branches of a skill tree.
+stages, unlocking harder progressions, watching workouts evolve as ability
+improves, and seeing completed branches of a skill tree.
 
 Do not depend on coins, currencies, daily-login rewards, arbitrary
 badges, energy systems, loot, or reward spam.
@@ -53,14 +52,19 @@ design work is added.
 
 The intended primary navigation has three areas.
 
-### Journey
+### Dashboard
 
-The high-level overview. It answers: **Where am I overall, what am I
-working toward, and what must I master next?**
+The high-level overview of the user's real demonstrated abilities and current
+training state. It answers: **What can I do, what am I working toward, and what
+has changed recently?**
 
-It should eventually show current overall level, level requirements and
-their completion, active skills, important current targets, and
-meaningful recent unlocks/mastery where useful.
+The Dashboard summarizes progression; it does not own a separate progression
+system. Skills and logged performance remain the sources of truth. Likely
+Dashboard content includes active skills/goals, important current or next
+targets, demonstrated abilities, and meaningful recent mastery/progress. Exact
+V1 Dashboard content and visual design are intentionally deferred until later in
+V1, after the skill/progression/workout systems produce meaningful data to
+summarize.
 
 ### Workout
 
@@ -162,7 +166,7 @@ If the user reaches a requirement during a normal workout, that result
 can satisfy the requirement automatically.
 
 **Training → logged result → requirement evaluator →
-confirmation/mastery → skill/level progression.**
+confirmation/mastery → skill progression.**
 
 Progression should emerge naturally from training.
 
@@ -265,9 +269,8 @@ Generated workouts should be assembled from:
 1.  active skills/current stages;
 2.  exercises required to progress those stages;
 3.  relevant general foundation work;
-4.  current overall level where appropriate;
-5.  available equipment;
-6.  recovery/frequency rules if implemented later.
+4.  available equipment;
+5.  recovery/frequency rules if implemented later.
 
 A user may have at most **3 active skills** at a time. Skills may be
 deactivated and reactivated without losing earned progress.
@@ -289,21 +292,21 @@ change appropriate tracking configuration.
 
 Generation is assistance, not loss of control.
 
-## 14. Overall levels
+## 14. Overall levels are deferred from V1
 
-Overall Level and individual Skill progression are separate.
+Overall/Journey Levels are not part of the current V1 direction. The user's
+progression should be represented directly by demonstrated abilities, mastered
+skill-tree nodes, and current skill goals rather than compressed into an
+artificial overall level.
 
-Example: a user may be Level 3 overall while Handstand is 5/7, Pull-up
-3/6, L-Sit 2/6, and Push-up 6/8.
+Do not build new V1 product behavior around `JourneyLevel` or level
+requirements. Existing prototype level models/UI are provisional legacy
+foundation and should only be removed or migrated as an explicit implementation
+checkpoint; do not delete them opportunistically while making unrelated changes.
 
-Overall levels represent broader calisthenics development/foundation.
-Skill trees represent specific abilities.
-
-Overall levels should advance through meaningful requirements, not
-arbitrary XP totals.
-
-Exact level content must be discussed and approved before being
-considered canonical.
+The concept may be reconsidered later only if it gains a clear purpose that
+strengthens the core training loop without duplicating the Skills progression
+system.
 
 ## 15. No XP system for now
 
@@ -311,7 +314,7 @@ Do **not** add XP as a core mechanic without approval.
 
 XP was considered and intentionally deferred because it creates a second
 artificial progression system, requires balancing, can invite grinding,
-makes overall levels less meaningful, and adds complexity without
+creates another balancing burden, and adds complexity without
 strengthening the fundamental training loop.
 
 **The skill tree is the game.**
@@ -325,7 +328,7 @@ Meaningful achievements are actual mastery: First Pull-up, 20 clean
 Push-ups, 30-second Handstand, L-Sit, mastering a node, unlocking a new
 progression.
 
-These belong naturally in Journey/Skills.
+These belong naturally in Dashboard/Skills.
 
 Product philosophy: **"My achievements are real life."**
 
@@ -382,10 +385,6 @@ Exercises, order, sets, target ranges, substitutions.
 Name, stages, stage order, prerequisites, requirements, exercises
 supporting stages.
 
-### Levels
-
-Names/numbers, requirements, confirmation counts, unlock conditions.
-
 Initial built-in content is **seed data**, not immutable application
 logic. Do not hardcode product content when it can reasonably be data.
 
@@ -423,13 +422,9 @@ under discussion.
 
 Do not assume these prototype seed choices are final:
 
--   Hollow Body Hold as a Level 1 requirement;
--   exact Level 1 exercises;
--   exact Level 1 mastery requirements;
 -   exact Pull-up progression;
 -   exact L-Sit progression;
 -   exact Handstand progression;
--   future level contents.
 
 Before substantially expanding training content, discuss active skills,
 correct progression stages, exercises supporting each stage, measurable
@@ -459,7 +454,7 @@ position** → **Receive training based on current stages** → **Perform
 the workout and log reality** → **Compare against previous performance**
 → **Automatically evaluate mastery** → **Confirm repeatable achievements
 across sessions** → **Master nodes/unlock progressions** → **Workout
-adapts to new ability** → **Continue the journey**
+adapts to new ability** → **Continue progressing**
 
 If a feature does not strengthen this loop, question it before adding
 it.
@@ -476,34 +471,33 @@ it.
 7.  Keep exercise logging metric-driven.
 8.  Keep workouts editable/extensible.
 9.  Keep skills editable/extensible.
-10. Keep levels editable/extensible.
-11. Keep overall levels separate from skill progression.
-12. Treat actual logged performance as authoritative.
-13. Let normal workouts satisfy progression requirements.
-14. Preserve separate-session mastery confirmation.
-15. Keep V1 local-first.
-16. Prioritize functionality over visual polish.
-17. Do not treat seed workout content as finalized.
-18. Avoid systems that do not directly support the core loop.
-19. Before changing a documented decision, explain why and obtain
+10. Do not introduce Overall/Journey Levels into V1 without approval.
+11. Treat actual logged performance as authoritative.
+12. Let normal workouts satisfy progression requirements.
+13. Preserve separate-session mastery confirmation.
+14. Keep V1 local-first.
+15. Prioritize functionality over visual polish.
+16. Do not treat seed workout content as finalized.
+17. Avoid systems that do not directly support the core loop.
+18. Before changing a documented decision, explain why and obtain
     approval.
-20. Prefer the smallest implementation change that preserves the agreed
+19. Prefer the smallest implementation change that preserves the agreed
     architecture.
-21. When uncertain about product behavior, ask the project owner rather
+20. When uncertain about product behavior, ask the project owner rather
     than inventing a new rule.
-22. Treat each coherent change as a separate checkpoint. Document what
+21. Treat each coherent change as a separate checkpoint. Document what
     changed and how it was verified in a clear Git commit message and in
     the agent's handoff. Update the relevant project documentation when
     product behavior, architecture, setup, or usage changes.
-23. After verifying each change, commit only the files belonging to that
+22. After verifying each change, commit only the files belonging to that
     change and push the commit to the current branch's configured remote
     before beginning the next change.
-24. If committing or pushing fails, stop before making another change and
+23. If committing or pushing fails, stop before making another change and
     report the failure to the project owner. Do not leave multiple
     completed changes accumulated only in the working tree.
-25. Do not amend, squash, rewrite published history, or force-push unless
+24. Do not amend, squash, rewrite published history, or force-push unless
     the project owner explicitly requests it.
-26. Before committing a checkpoint, inspect the working tree and
+25. Before committing a checkpoint, inspect the working tree and
     distinguish changes made for the current task from pre-existing or
     unrelated changes. Commit only files and changes required for the
     approved checkpoint. Do not modify, revert, stage, clean up, or include
@@ -518,9 +512,9 @@ it.
 The project currently has a functioning SwiftUI/SwiftData prototype with
 local persistence, workout sessions, exercise/set logs,
 previous-vs-current results, metric-driven entry (reps, seconds,
-weight + reps), numeric keyboard dismissal, initial
-Journey/Skills/level-requirement models, and a workout-history
-prototype.
+weight + reps), numeric keyboard dismissal, an initial Dashboard/Journey
+prototype, Skills, provisional level-requirement models, and a
+workout-history prototype.
 
 The repository has an initial V1 Git checkpoint.
 

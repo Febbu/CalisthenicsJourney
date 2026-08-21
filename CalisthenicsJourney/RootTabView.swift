@@ -4,10 +4,10 @@ struct RootTabView: View {
     var body: some View {
         TabView {
             NavigationStack {
-                JourneyView()
+                DashboardView()
             }
             .tabItem {
-                Label("Journey", systemImage: "gamecontroller.fill")
+                Label("Dashboard", systemImage: "rectangle.grid.2x2.fill")
             }
 
             NavigationStack {

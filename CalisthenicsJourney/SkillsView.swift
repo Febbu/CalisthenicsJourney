@@ -34,7 +34,7 @@ private struct SkillCard: View {
     }
 
     private var currentName: String {
-        stages.first(where: \.isCurrent)?.name ?? (skill.unlockLevel == nil ? "Not started" : "Locked")
+        stages.first(where: \.isCurrent)?.name ?? "Not started"
     }
 
     var body: some View {
@@ -45,12 +45,6 @@ private struct SkillCard: View {
                 Text(skill.name.uppercased())
                     .font(.headline)
                 Spacer()
-
-                if let level = skill.unlockLevel {
-                    Label("L\(level)", systemImage: "lock.fill")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
             }
 
             SwiftUI.ProgressView(value: Double(completed), total: Double(max(stages.count, 1)))

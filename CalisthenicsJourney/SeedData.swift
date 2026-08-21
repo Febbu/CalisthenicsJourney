@@ -22,7 +22,7 @@ enum SeedData {
         [pushups, pulldown, shoulderPress, row, legPress, rdl, hollow, handstand]
             .forEach(context.insert)
 
-        let workout = WorkoutTemplate(name: "Level 1 — Foundation")
+        let workout = WorkoutTemplate(name: "Foundation Workout")
         context.insert(workout)
 
         let templateExercises = [

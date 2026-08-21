@@ -122,7 +122,6 @@ Examples:
 -   WorkoutSession
 -   Skill
 -   SkillStage
--   JourneyLevel
 -   Requirement
 
 Relationships should use model relationships or stable IDs rather than
@@ -156,7 +155,7 @@ one when logic has become reusable or should be isolated from UI.
 
 ## 1.5 Seed content is data
 
-Initial workouts, skills, stages, and levels are seed data.
+Initial workouts, skills, and stages are seed data.
 
 They are not application logic.
 
@@ -208,15 +207,13 @@ CalisthenicsJourney
 │   ├── TrainingLog.swift
 │   ├── Skill.swift
 │   ├── SkillStage.swift
-│   ├── JourneyLevel.swift
 │   ├── Requirement.swift
 │   └── UnlockRule.swift
 │
 ├── Features
 │   │
-│   ├── Journey
-│   │   ├── JourneyView.swift
-│   │   ├── LevelRequirementView.swift
+│   ├── Dashboard
+│   │   ├── DashboardView.swift
 │   │   └── ...
 │   │
 │   ├── Workout
@@ -469,29 +466,16 @@ reason.
 
 ------------------------------------------------------------------------
 
-## 3.8 JourneyLevel
+## 3.8 Dashboard
 
-Overall Level is separate from Skill progression.
+Dashboard is a presentation feature, not a progression model. It should derive
+its overview from existing skill, requirement, workout-history, and progression
+data rather than persist a competing overall-level state. Exact Dashboard
+content is intentionally deferred until later in V1.
 
-A JourneyLevel may contain:
-
--   level number;
--   name;
--   requirements;
--   prerequisites;
--   unlock relationship to next level.
-
-Level progression must remain data-driven.
-
-Do not create functions such as:
-
-``` swift
-unlockLevel2()
-unlockLevel3()
-unlockLevel4()
-```
-
-as the primary progression architecture.
+`JourneyLevel` is not part of the intended V1 architecture. Existing prototype
+level code may remain temporarily until a deliberate cleanup/migration
+checkpoint, but new V1 architecture should not depend on it.
 
 ------------------------------------------------------------------------
 
@@ -610,7 +594,7 @@ Stage / level / shared requirement state changes
 
 Skills themselves are normally visible and selectable rather than hidden
 behind hard unlocks. Progression may still determine which stages are
-completed/current/future and whether a JourneyLevel is mastered.
+completed/current/future and skill-stage progression state.
 
 A requirement may be relevant to more than one skill path. The same logged
 evidence must be reusable wherever the same concrete ability is required.
@@ -622,7 +606,6 @@ Possible progression consequences include:
 -   a SkillStage becoming completed/current;
 -   another SkillStage branch becoming relevant;
 -   shared foundational requirements appearing already completed;
--   the next JourneyLevel becoming completed;
 -   a new exercise/progression becoming appropriate;
 -   another future progression consequence.
 
@@ -678,7 +661,6 @@ Examples:
 
 ``` text
 SkillStage A completed
-JourneyLevel 2 reached
 Skill B prerequisite node completed
 ```
 
@@ -704,7 +686,6 @@ Possible responsibilities:
     same demonstrated ability;
 -   recognize already-satisfied foundational requirements when a new skill
     is selected;
--   determine whether a JourneyLevel becomes completed;
 -   expose progression changes so the UI can present meaningful mastery
     feedback.
 
@@ -754,7 +735,6 @@ Inputs may include:
 -   active Skills;
 -   current Stage for each Skill;
 -   exercises linked to those stages;
--   overall JourneyLevel;
 -   general foundation exercises;
 -   available equipment;
 -   user overrides/preferences;
@@ -887,7 +867,6 @@ Examples:
 
 -   SkillStage mastery requirement;
 -   shared/foundational skill requirement;
--   JourneyLevel requirement.
 
 Avoid duplicating evaluation logic for each owner type.
 
@@ -1359,7 +1338,6 @@ High-value unit tests:
 -   the same evidence can satisfy equivalent requirements across multiple
     skill paths without being consumed;
 -   inactive skills may reflect valid progress from global workout history;
--   level completion;
 -   future branching/ANY behavior when those rules are implemented.
 
 ### WorkoutGenerator
@@ -1407,13 +1385,11 @@ creation.
 
 Editing must operate on data models.
 
-A generic `Requirement` currently stores optional `journeyLevel` and
-`skillStage` relationships. Its creation APIs establish the invariant
-that exactly one owner is set. Because those relationships remain
-mutable for SwiftData and future editing, the editing system must
-validate that it never saves a requirement with both owners or with no
-owner. Do not add a polymorphic persistence abstraction merely to
-enforce this invariant.
+Existing prototype `Requirement` persistence may still contain level-related
+ownership from earlier work. Treat that as provisional legacy structure. New V1
+requirement behavior should be skill/stage-focused, and any removal or migration
+of legacy level ownership must be handled as an explicit checkpoint rather than
+an unrelated cleanup.
 
 Example:
 
@@ -1465,7 +1441,7 @@ Before adding visual polish:
 8.  Implement simple skill-driven `WorkoutGenerator`.
 9.  Add workout editing/override.
 10. Add Skill/Stage/Requirement editing.
-11. Add Journey-level editing.
+11. Build/refine Dashboard late in V1 from real progression data.
 12. Only then consider richer visuals, animations, iCloud, widgets, etc.
 
 This order may change with explicit project-owner approval.
@@ -1483,7 +1459,7 @@ Unless the project owner explicitly changes them:
 -   Progression is requirement-driven.
 -   Mastery may require repeated confirmation across sessions.
 -   Progression consequences are generic/data-driven.
--   Overall Level and Skill progress are separate.
+-   V1 progression is represented directly by Skills and demonstrated abilities; Overall/Journey Levels are deferred.
 -   Seed content is editable data.
 -   Views do not own training rules.
 -   V1 remains local-first.
