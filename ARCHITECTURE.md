@@ -1438,8 +1438,8 @@ This is the primary reason the architecture must remain data-driven.
 
 Before adding visual polish:
 
-1.  Finalize supporting exercise and workout content for the approved
-    mastery trees in `SKILLS.md` with the project owner.
+1.  Finalize prescriptions and workout content for the approved mastery
+    trees and exercise sequences in `SKILLS.md` with the project owner.
 2.  Remove the dedicated Progress tab from primary navigation.
 3.  Preserve workout history as a secondary destination.
 4.  Refine models so Skills/Stages can explicitly reference

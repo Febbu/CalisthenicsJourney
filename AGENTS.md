@@ -418,20 +418,20 @@ unnecessary dialogs and confirmation steps.
 
 ## 21. Supporting training content is NOT finalized
 
-The V1 skill catalog and mastery trees are approved in `SKILLS.md`, but
-the supporting training content beneath those trees is still under
-discussion.
+The V1 skill catalog, mastery trees, and default exercise sequences are
+approved in `SKILLS.md`, but detailed prescriptions and workout behavior
+are still under discussion.
 
 Do not assume these prototype seed choices are final:
 
--   supporting exercises;
--   training prescriptions;
+-   additional exercise choices beyond the approved default sequences;
+-   training prescriptions and progression rules;
 -   exact sets, reps, hold times, rest, and preparation details;
 -   workout-generation behavior.
 
-Before substantially expanding supporting content, discuss exercises for
-each approved transition, their prescriptions, objective form standards,
-and how they form a balanced workout.
+Before substantially expanding training content, discuss additions to the
+approved sequences, their prescriptions, objective form standards, and
+how they form a balanced workout.
 
 **Prototype seed data is not approved training doctrine.**
 
@@ -524,9 +524,9 @@ The repository has an initial V1 Git checkpoint.
 The current prototype is a foundation, not the final information
 architecture.
 
-The next major design task is to finalize **supporting exercises and
-training prescriptions for the approved skill trees** before broad
-editing interfaces or visual polish.
+The next major design task is to finalize **training prescriptions and
+validation standards for the approved skill trees and exercise
+sequences** before broad editing interfaces or visual polish.
 
 ## 26. Product test
 

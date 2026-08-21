@@ -10,7 +10,9 @@ It complements `AGENTS.md` and `ARCHITECTURE.md`.
 - `ARCHITECTURE.md` protects software structure and implementation boundaries.
 - `SKILLS.md` protects the approved V1 skill catalog, mastery trees, and training-content decisions.
 
-The exact supporting exercises, training prescriptions, training set/rep schemes, rest periods, and workout-generation behavior are still under discussion and will be added later.
+The detailed training prescriptions, set/rep schemes, rest periods, progression
+rules, and workout-generation behavior are still under discussion and will be
+added later.
 
 Do not silently redesign these skill trees. If a progression node or mastery standard appears to need changing, explain the proposed change to the project owner and obtain approval first.
 
@@ -161,6 +163,32 @@ user try an appropriate harder progression, whose successful performance may
 provide evidence. A future `Too Hard` action may offer an appropriate regression
 without removing mastery the user has already earned.
 
+## 1.9 Prefer simple, specific training
+
+Training should prioritize, in order:
+
+1. the movement the athlete is trying to learn;
+2. easier or current versions of that movement for additional quality work
+   when useful;
+3. previously learned relevant movements;
+4. bridge or accessory exercises only when they solve a meaningful progression
+   gap.
+
+Do not add exercises merely because they might theoretically help. Prefer a
+small number of obvious, high-value movements over unnecessarily large or
+complicated exercise lists.
+
+Most mastery nodes are trainable movements as well as checkpoints for ability
+demonstrated at a defined standard. Passing a node does not retire its movement;
+it remains available for useful later training. Not every exercise must be a
+mastery node, and a competency node such as a safety or control skill may not
+behave like a normal repeated exercise.
+
+When practical, training toward a node should directly practice its target
+movement. Previously mastered or easier versions may add volume or lower-
+difficulty practice. Use a special bridge exercise only when it clearly closes
+a meaningful gap.
+
 ---
 
 # 2. V1 skill catalog
@@ -209,6 +237,36 @@ Knee Push-up
 - Higher repetition ability continues to be logged after mastery.
 - Other Push-up variations are deferred for later content work.
 
+## Approved training sequence
+
+### Wall Push-up → Incline Push-up
+
+- Incline Push-ups
+- Wall Push-ups if needed
+
+### Incline Push-up → Knee Push-up
+
+- Knee Push-ups
+- Incline Push-ups
+
+### Knee Push-up → 1 Strict Push-up
+
+- Strict Push-up attempts
+- Low Incline Push-ups
+- Knee Push-ups
+
+### 1 → 5 Strict Push-ups
+
+- Strict Push-ups
+- Easier Push-up variation only when useful for additional volume
+
+### 5 → 10 Strict Push-ups
+
+- Strict Push-ups
+
+Negative Push-ups are not part of the approved default Push-up training
+sequence.
+
 ---
 
 # 4. Pull-up
@@ -242,6 +300,40 @@ Negative Pull-up
 - **5 clean strict Pull-ups = Pull-up mastery.**
 - Pull-ups, Scapular Pulls, hangs, and other mastered pulling movements may later be reused as exercises for skills such as Muscle-up and Front Lever.
 
+## Approved training sequence
+
+### Dead Hang → Active Hang / Scapular Pull
+
+- Scapular Pulls
+- Dead Hangs
+
+### Active Hang / Scapular Pull → Assisted Pull-up
+
+- Assisted Pull-ups
+- Scapular Pulls
+
+### Assisted Pull-up → Negative Pull-up
+
+- Negative Pull-ups
+- Assisted Pull-ups
+
+### Negative Pull-up → 1 Strict Pull-up
+
+- Strict Pull-up attempts
+- Negative Pull-ups
+- Assisted Pull-ups
+
+### 1 → 3 Strict Pull-ups
+
+- Strict Pull-ups
+- Assisted Pull-ups if useful for additional volume
+
+### 3 → 5 Strict Pull-ups
+
+- Strict Pull-ups
+
+Negative Pull-ups are an approved important bridge exercise.
+
 ---
 
 # 5. Dip
@@ -272,6 +364,35 @@ Negative Dip
 - **5 clean strict Dips = Dip mastery.**
 - Bench Dips are not part of the current V1 Dip mastery tree.
 - Mastered Dip-related movements may later be reused where useful, especially for Muscle-up training.
+
+## Approved training sequence
+
+### Parallel Bar Support Hold → Assisted Dip
+
+- Assisted Dips
+- Support Holds
+
+### Assisted Dip → Negative Dip
+
+- Negative Dips
+- Assisted Dips
+
+### Negative Dip → 1 Strict Dip
+
+- Strict Dip attempts
+- Negative Dips
+- Assisted Dips
+
+### 1 → 3 Strict Dips
+
+- Strict Dips
+- Assisted Dips if useful for additional volume
+
+### 3 → 5 Strict Dips
+
+- Strict Dips
+
+Negative Dips are an approved important bridge exercise.
 
 ---
 
@@ -309,6 +430,39 @@ First Full L-Sit
 - **10 clean seconds in a Full L-Sit = L-Sit mastery.**
 - Longer holds continue to be logged as demonstrated ability.
 
+## Approved training sequence
+
+### Supported L-Sit Press → Single-Leg Lift
+
+- Single-Leg Lifts
+- Supported L-Sit Presses
+
+### Single-Leg Lift → Seated Leg Raises
+
+- Seated Leg Raise attempts
+- Single-Leg Lifts
+
+### Seated Leg Raises → Tuck L-Sit
+
+- Tuck L-Sit attempts
+- Seated Leg Raises
+
+### Tuck L-Sit → One-Leg L-Sit
+
+- One-Leg L-Sit attempts
+- Tuck L-Sits
+- both sides
+
+### One-Leg L-Sit → Full L-Sit
+
+- Full L-Sit attempts
+- One-Leg L-Sits
+- Tuck L-Sits if easier work is useful
+
+### Full L-Sit → 10s Full L-Sit
+
+- Full L-Sit holds
+
 ---
 
 # 7. Pistol Squat
@@ -340,6 +494,36 @@ Negative Pistol Squat
 - **5 clean Pistol Squats on each leg = Pistol Squat mastery.**
 - Side-specific performance must remain visible in the underlying evidence.
 - Shrimp Squat and other single-leg squat variations are outside the current V1 tree.
+
+## Approved training sequence
+
+### Deep Bodyweight Squat → Assisted Pistol Squat
+
+- Assisted Pistol attempts
+- Deep Bodyweight Squats
+
+### Assisted Pistol Squat → Negative Pistol Squat
+
+- Negative Pistols
+- Assisted Pistols
+
+### Negative Pistol Squat → 1 Pistol Squat on each leg
+
+- Full Pistol attempts
+- Negative Pistols
+- Assisted Pistols if needed
+
+### 1 → 3 Pistol Squats on each leg
+
+- Pistol Squats
+- Assisted Pistols if useful for additional volume
+
+### 3 → 5 Pistol Squats on each leg
+
+- Pistol Squats
+
+Left/right evidence requirements continue to apply. Ankle and hip preparation
+belongs to optional preparation, not the mastery tree.
 
 ---
 
@@ -378,6 +562,50 @@ First Freestanding Handstand
 - **10 clean seconds Freestanding Handstand = Handstand mastery.**
 - Longer holds continue to be logged as demonstrated ability.
 - Wrist/shoulder preparation is recommended training preparation, not a mastery node.
+
+## Approved training sequence
+
+### Wall Walk → 30s Chest-to-Wall Handstand
+
+- Chest-to-Wall Handstands
+- Wall Walks
+
+### 30s Chest-to-Wall Handstand → Safe Handstand Bail
+
+- Safe Bail practice
+- Chest-to-Wall Handstands
+
+### Safe Handstand Bail → Wall Handstand Balance
+
+- Wall Balance attempts
+- Chest-to-Wall Handstands
+- Safe Bail practice only as needed
+
+### Wall Handstand Balance → Controlled Handstand Kick-Up
+
+- Kick-Up attempts
+- Wall Balance
+
+### Controlled Handstand Kick-Up → First Freestanding Handstand
+
+- Freestanding Handstand attempts
+- Kick-Ups
+- Wall Balance if easier practice is useful
+
+### First Freestanding Handstand → 5s Freestanding Handstand
+
+- Freestanding Handstands
+
+### 5s → 10s Freestanding Handstand
+
+- Freestanding Handstands
+
+Recommended optional preparation:
+
+- wrists
+- shoulders
+
+Safe Handstand Bail remains an independent competency.
 
 ---
 
@@ -433,6 +661,47 @@ Negative Muscle-up
 - **3 clean strict Bar Muscle-ups = Muscle-up mastery.**
 - Higher-rep or weighted Muscle-up work is beyond base mastery and may be explored later.
 
+## Approved training sequence
+
+### Foundations → High Pull-up
+
+- High Pull-up attempts
+- Strict Pull-ups
+
+### High Pull-up → Straight-Bar Dip
+
+- Straight-Bar Dips
+- Regular Dips if easier volume is useful
+
+### Straight-Bar Dip → Assisted Muscle-up
+
+- Assisted Muscle-ups
+- High Pull-ups
+- Straight-Bar Dips
+
+### Assisted Muscle-up → Muscle-up Transition
+
+- Muscle-up Transition practice
+- Assisted Muscle-ups
+
+### Muscle-up Transition → Negative Muscle-up
+
+- Negative Muscle-ups
+- Transition practice
+
+### Negative Muscle-up → 1 Strict Bar Muscle-up
+
+- Strict Muscle-up attempts
+- Negative Muscle-ups
+- Assisted Muscle-ups if needed
+
+### 1 → 3 Strict Bar Muscle-ups
+
+- Strict Bar Muscle-ups
+
+Previously learned Pull-up and Dip movements are reused rather than treated as
+new isolated content.
+
 ---
 
 # 10. Front Lever
@@ -473,6 +742,42 @@ Full Front Lever
 - Negatives, rows, assistance, and similar drills are supporting training rather than separate mastery nodes unless later approved.
 - **5 clean seconds in a Full Front Lever = Front Lever mastery.**
 - Longer holds remain demonstrated ability after mastery.
+
+## Approved training sequence
+
+### Pull-up Foundation → Tuck Front Lever
+
+- Tuck Front Lever attempts
+- Pull-ups
+- Scapular Pulls
+
+### Tuck Front Lever → Advanced Tuck Front Lever
+
+- Advanced Tuck attempts
+- Tuck Front Lever holds
+
+### Advanced Tuck Front Lever → One-Leg Front Lever
+
+- One-Leg Front Lever attempts
+- Advanced Tuck holds
+- both sides
+
+### One-Leg Front Lever → Straddle Front Lever
+
+- Straddle Front Lever attempts
+- One-Leg Front Lever holds
+
+### Straddle Front Lever → Full Front Lever
+
+- Full Front Lever attempts
+- Straddle Front Lever holds
+
+### Full Front Lever → 5s Full Front Lever
+
+- Full Front Lever holds
+
+Scapular Pulls are intentionally reused as an important previously learned
+pulling and scapular movement.
 
 ---
 
@@ -521,16 +826,69 @@ Full Planche
 - **5 clean seconds in a Full Planche = Planche mastery.**
 - Wrist preparation is recommended and optional, not a mastery gate.
 
+## Approved training sequence
+
+### Push-up Foundation → Planche Lean
+
+- Planche Leans
+- Push-ups
+
+### Planche Lean → Frog Stand
+
+- Frog Stand attempts
+- Planche Leans
+
+### Frog Stand → Tuck Planche
+
+- Tuck Planche attempts
+- Frog Stands
+- Planche Leans
+
+### Tuck Planche → Advanced Tuck Planche
+
+- Advanced Tuck attempts
+- Tuck Planche holds
+- Planche Leans
+
+### Advanced Tuck Planche → One-Leg Planche
+
+- One-Leg Planche attempts
+- Advanced Tuck holds
+- both sides
+
+### One-Leg Planche → Straddle Planche
+
+- Straddle Planche attempts
+- One-Leg Planche holds
+
+### Straddle Planche → Full Planche
+
+- Full Planche attempts
+- Straddle Planche holds
+
+### Full Planche → 5s Full Planche
+
+- Full Planche holds
+
+Planche Leans remain regular training during early Planche progression through
+the Tuck Planche → Advanced Tuck Planche transition. After that, they may become
+optional rather than automatically prescribed.
+
+Recommended optional preparation:
+
+- wrists
+- shoulders
+
 ---
 
-# 12. Training content still to be designed
+# 12. Training prescriptions still to be designed
 
-The nine V1 mastery trees above are approved, but the training system beneath them is not yet finalized.
+The nine V1 mastery trees and the default exercise sequences above are approved,
+but their detailed training prescriptions and generation behavior are not yet
+finalized.
 
 For each transition, the project still needs to define:
 
-- supporting exercises;
-- which previously mastered movements should be reused;
 - exercise roles;
 - sets;
 - reps;
@@ -544,6 +902,8 @@ For each transition, the project still needs to define:
 - objective form/ROM standards;
 - what evidence validates technique/control nodes that are not simple rep or duration thresholds.
 
-The next major content-design task is to work through these skill trees and define how the app should train the user from one node to the next.
+The next major content-design task is to define how much, how often, and under
+what progression rules the approved exercises should be trained. Additional
+exercise choices require approval rather than being inferred from this document.
 
 Do not prematurely hardcode the current trees as special-case application logic. They remain editable product content and should ultimately be represented through the generic Skill / SkillStage / Requirement / exercise architecture defined by the project.
