@@ -886,30 +886,120 @@ Recommended optional preparation:
 ## 12.1 The first workout is calibration
 
 The first workout for a selected skill is calibration rather than normal
-training. Its purpose is to establish a comfortable starting estimate without
-exhausting the athlete or testing their absolute maximum.
+training. Its purpose is to establish a comfortable, user-controlled starting
+estimate quickly, without exhausting the athlete, testing their absolute
+maximum, or requiring three full sets for every selected skill.
 
-The athlete should choose the variation they believe is appropriate from the
-available progression options, perform a comfortable effort with good form and
-some capacity remaining, and record what they actually performed.
+### Choose the variation
 
-Calibration should capture the relevant dimensions of the movement:
+For each selected skill, the athlete first chooses the progression or movement
+variation they believe currently fits their ability:
 
-- movement or variation performed;
+```text
+Push-up variation:
+[ Strict Push-up ▾ ]
+```
+
+This choice is an initial estimate. Selecting a harder variation is not mastery
+evidence by itself; actual demonstrated performance remains the meaningful
+evidence.
+
+### Choose a comfortable repeatable target
+
+Instead of asking how many repetitions or seconds the athlete can achieve at
+maximum, calibration should conceptually ask:
+
+> How many could you comfortably repeat for 3 sets?
+
+For hold-based movements:
+
+> How long could you comfortably repeat for 3 sets?
+
+The athlete chooses a conservative target they believe is repeatable with clean
+form, manageable fatigue, and some capacity remaining. The target may include:
+
 - repetitions for rep-based movements;
-- hold duration for hold-based movements;
-- left/right performance where applicable;
+- seconds for hold-based movements;
+- left/right targets where applicable;
 - appropriate attempt or quality information for technique/control movements
   once that design is finalized.
 
-The exact formula that converts calibration evidence into the first normal-
-workout prescription remains undecided.
+This direct repeatable-three-set estimate replaces the need for a mathematical
+calibration formula. In particular, do not introduce a "comfortable result ÷ 2"
+rule.
+
+### Try one calibration set
+
+The athlete performs one set at the selected variation and target as a quick
+reality check and records what they actually performed. This is not a full
+three-set workout or a maximum-effort test.
+
+```text
+Selected:
+Strict Push-up
+5 reps × 3 sets
+
+Calibration check:
+Try 5 reps once.
+```
+
+### Adjust before confirmation
+
+After the calibration set, the athlete may adjust the selected variation,
+repeatable rep or hold target, and side-specific targets before confirming.
+
+```text
+How did that feel?
+
+Variation:
+[ Strict Push-up ▾ ]
+
+Repeatable target:
+[ 5 reps ]
+
+[ Confirm starting level ]
+```
+
+Exact UI wording and controls remain open. The required behavior is that the
+estimate stays adjustable before confirmation.
+
+### Confirm the starting estimate
+
+Once satisfied, the athlete confirms the estimated starting prescription and
+moves to the next selected skill:
+
+```text
+Strict Push-up
+Estimated starting prescription:
+3 × 5
+```
+
+Repeat this lightweight process for each selected skill. The confirmed result
+is an estimate, not proven multi-set working capacity.
 
 ## 12.2 Normal workouts establish working capacity
 
 After calibration, normal workouts use actual multi-set performance to learn
 the athlete's working capacity. The first normal workout is especially useful
 as the strengthening and training baseline.
+
+For example, a calibration estimate of `Strict Push-up — 3 × 5` may produce any
+of these first normal-workout results:
+
+```text
+5 / 5 / 5
+```
+
+```text
+5 / 4 / 3
+```
+
+```text
+7 / 6 / 5
+```
+
+This real three-set performance is stronger evidence for future adaptation than
+the starting estimate.
 
 Evaluate the full workout rather than only the best single set:
 
@@ -923,6 +1013,19 @@ Actual:
 
 The complete three-set result describes working capacity more usefully than a
 best set of 4 alone.
+
+Preserve the lifecycle distinction:
+
+```text
+Calibration
+→ user-controlled starting estimate
+
+First normal workout
+→ first strong evidence of repeatable working capacity
+
+Later workouts
+→ progressive overload and adaptation from actual performance
+```
 
 ## 12.3 Three equal sets are the V1 default
 
@@ -1073,7 +1176,6 @@ skill sequences.
 
 Do not yet implement or finalize:
 
-- calibration-to-prescription formulas;
 - exact hold-time progression increments;
 - accelerated progression formulas for significant overperformance;
 - detailed technique/attempt prescriptions;
@@ -1082,6 +1184,10 @@ Do not yet implement or finalize:
 - weekly frequency;
 - application models or seed data;
 - workout-generator behavior or UI.
+
+Calibration does not use a divide-by-two or other one-set conversion formula.
+Its variation and repeatable three-set target are confirmed directly after a
+single adjustable reality-check set.
 
 Additional exercise choices require approval rather than being inferred from
 this document. Do not hardcode the current trees, sequences, or prescriptions as

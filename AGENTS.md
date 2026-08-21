@@ -426,7 +426,7 @@ remaining formulas and workout behavior are still under discussion.
 Do not assume these prototype seed choices are final:
 
 -   additional exercise choices beyond the approved default sequences;
--   calibration, hold-increment, and accelerated-progression formulas;
+-   hold-increment and accelerated-progression formulas;
 -   exact rest, frequency, and technique/attempt details;
 -   workout-generation behavior.
 
