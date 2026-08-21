@@ -239,7 +239,7 @@ different prescription. This is a default, not a universal rule.
 The user should choose a resistance that allows controlled reps without
 maximal effort. Future workouts should aim for gradual improvement within
 the prescribed range. V1 skill-movement prescriptions follow the
-calibration and equal-set principles in `SKILLS.md`.
+calibration and deterministic three-set progression principles in `SKILLS.md`.
 
 Example: Shoulder Press `3 × 8–12`.
 
@@ -426,7 +426,7 @@ remaining formulas and workout behavior are still under discussion.
 Do not assume these prototype seed choices are final:
 
 -   additional exercise choices beyond the approved default sequences;
--   hold-increment and accelerated-progression formulas;
+-   accelerated-progression formulas;
 -   exact rest, frequency, and technique/attempt details;
 -   workout-generation behavior.
 

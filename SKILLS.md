@@ -1027,27 +1027,30 @@ Later workouts
 → progressive overload and adaptation from actual performance
 ```
 
-## 12.3 Three equal sets are the V1 default
+## 12.3 Three predictable sets are the V1 default
 
 For normal rep- and hold-based strength work, **3 sets are the default
-prescription structure**. Default set targets should be equal and predictable.
-
-Prefer:
+prescription structure**. Calibration begins with equal estimated targets:
 
 ```text
-3 × 5
+5 / 5 / 5
 ```
 
-over an unnecessarily irregular prescription such as:
+Once normal training begins, targets may become slightly uneven through the
+deterministic progressive-overload rule in section 12.5. The three targets
+should remain close together, predictable, and understandable.
+
+Prefer this controlled structure over an unnecessarily irregular prescription
+such as:
 
 ```text
 11 / 13 / 8 / 12 / 16
 ```
 
-Uneven target prescriptions are not part of the V1 default unless a specific
-future training need justifies them. Three sets are a default, not a universal
-rule for every exercise; technique/control work may eventually use attempts or
-another appropriate structure.
+Slight unevenness created by progressive overload is not arbitrary uneven
+programming. Three sets are a default, not a universal rule for every exercise;
+technique/control work may eventually use attempts or another appropriate
+structure.
 
 ## 12.4 Do not prescribe failure by default
 
@@ -1059,29 +1062,52 @@ performance beyond the target are optional.
 ## 12.5 Progressive overload
 
 Progressive overload should remain simple and understandable. For rep-based
-work, the approved default direction is:
+and hold-based work, successful completion of the entire prescription
+progresses all three sets for the next relevant workout:
+
+- each set receives at least **+1**;
+- one set receives one additional **+1**, making its increase **+2**;
+- the set receiving the additional increment rotates across workouts; and
+- the prescription therefore increases by **4 total units** after each
+  successful workout.
+
+The exact starting position in the rotation is not important. The additional
+increment must rotate rather than permanently making the same set the largest.
+Conceptually:
 
 ```text
-3 × 3
-→ 3 × 4
-→ 3 × 5
+5 / 5 / 5
+→ 7 / 6 / 6
+→ 7 / 8 / 7
+→ 8 / 8 / 9
+→ 10 / 9 / 9
 → ...
 ```
 
-After the athlete successfully completes the entire prescribed workout, the
-next relevant workout may increase the target. Default rep progression should
-generally add **1 repetition per set**.
-
-Hold-based work follows the same concept:
+For rep-based work, the unit is repetitions:
 
 ```text
-3 × 5 seconds
-→ slightly longer equal holds
-→ slightly longer equal holds
+Push-ups
+
+5 / 5 / 5 reps
+→ 7 / 6 / 6
+→ 7 / 8 / 7
+→ 8 / 8 / 9
 ```
 
-The exact default number of seconds added after a successful hold prescription
-is not yet finalized.
+For hold-based work, the unit is seconds and the same progression applies:
+
+```text
+L-Sit
+
+5 / 5 / 5 seconds
+→ 7 / 6 / 6
+→ 7 / 8 / 7
+→ 8 / 8 / 9
+```
+
+This supersedes the previous equal-target, +1-per-set progression and resolves
+the generic hold-time increment for normal rep- and hold-based prescriptions.
 
 ## 12.6 Incomplete workouts repeat before regression
 
@@ -1091,13 +1117,13 @@ relevant workout by default:
 
 ```text
 Target:
-3 × 5
+7 / 6 / 6
 
 Actual:
-5 / 4 / 3
+7 / 5 / 5
 
 Next workout:
-3 × 5 again
+7 / 6 / 6 again
 ```
 
 Already-earned mastery is never removed by an incomplete workout.
@@ -1108,16 +1134,16 @@ The athlete should record actual performance even when it exceeds the target:
 
 ```text
 Target:
-3 × 3
+7 / 6 / 6
 
 Actual:
-6 / 5 / 4
+10 / 9 / 8
 ```
 
 Significant overperformance is evidence that working capacity may be higher
 than the current prescription. A future adaptive system may progress faster
-than the normal +1 path, but the formula for deciding when and by how much
-remains explicitly undecided.
+than the normal rotating +2/+1/+1 path, but the formula for deciding when and
+by how much remains explicitly undecided.
 
 ## 12.8 Personal bests motivate; they do not prescribe
 
@@ -1176,7 +1202,6 @@ skill sequences.
 
 Do not yet implement or finalize:
 
-- exact hold-time progression increments;
 - accelerated progression formulas for significant overperformance;
 - detailed technique/attempt prescriptions;
 - workout-combination logic across multiple active skills;
