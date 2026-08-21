@@ -23,13 +23,6 @@ struct RootTabView: View {
             .tabItem {
                 Label("Skills", systemImage: "point.3.connected.trianglepath.dotted")
             }
-
-            NavigationStack {
-                ProgressView()
-            }
-            .tabItem {
-                Label("Progress", systemImage: "chart.line.uptrend.xyaxis")
-            }
         }
     }
 }

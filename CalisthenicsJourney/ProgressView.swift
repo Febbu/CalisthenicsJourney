@@ -27,7 +27,7 @@ struct ProgressView: View {
                 }
             }
         }
-        .navigationTitle("Progress")
+        .navigationTitle("Workout History")
     }
 }
 

@@ -43,6 +43,12 @@ struct WorkoutHomeView: View {
                     .foregroundStyle(.secondary)
             }
 
+            NavigationLink {
+                ProgressView()
+            } label: {
+                Label("Workout History", systemImage: "clock.arrow.circlepath")
+            }
+
             Spacer()
         }
         .navigationTitle("Workout")
