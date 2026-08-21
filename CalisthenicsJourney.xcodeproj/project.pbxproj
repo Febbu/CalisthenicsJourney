@@ -8,7 +8,18 @@
 
 /* Begin PBXFileReference section */
 		8FB18B003037AB9900B97356 /* CalisthenicsJourney.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CalisthenicsJourney.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C10000013037AB9900B97356 /* CalisthenicsJourneyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CalisthenicsJourneyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
+
+/* Begin PBXContainerItemProxy section */
+		C10000023037AB9900B97356 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 8FB18AF83037AB9900B97356 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8FB18AFF3037AB9900B97356;
+			remoteInfo = CalisthenicsJourney;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		8FB18B023037AB9900B97356 /* CalisthenicsJourney */ = {
@@ -16,10 +27,22 @@
 			path = CalisthenicsJourney;
 			sourceTree = "<group>";
 		};
+		C10000033037AB9900B97356 /* CalisthenicsJourneyTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = CalisthenicsJourneyTests;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		8FB18AFD3037AB9900B97356 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C10000043037AB9900B97356 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -33,6 +56,7 @@
 			isa = PBXGroup;
 			children = (
 				8FB18B023037AB9900B97356 /* CalisthenicsJourney */,
+				C10000033037AB9900B97356 /* CalisthenicsJourneyTests */,
 				8FB18B013037AB9900B97356 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -41,6 +65,7 @@
 			isa = PBXGroup;
 			children = (
 				8FB18B003037AB9900B97356 /* CalisthenicsJourney.app */,
+				C10000013037AB9900B97356 /* CalisthenicsJourneyTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -70,6 +95,29 @@
 			productReference = 8FB18B003037AB9900B97356 /* CalisthenicsJourney.app */;
 			productType = "com.apple.product-type.application";
 		};
+		C10000053037AB9900B97356 /* CalisthenicsJourneyTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C10000063037AB9900B97356 /* Build configuration list for PBXNativeTarget "CalisthenicsJourneyTests" */;
+			buildPhases = (
+				C10000073037AB9900B97356 /* Sources */,
+				C10000043037AB9900B97356 /* Frameworks */,
+				C10000083037AB9900B97356 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C10000093037AB9900B97356 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				C10000033037AB9900B97356 /* CalisthenicsJourneyTests */,
+			);
+			name = CalisthenicsJourneyTests;
+			packageProductDependencies = (
+			);
+			productName = CalisthenicsJourneyTests;
+			productReference = C10000013037AB9900B97356 /* CalisthenicsJourneyTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -83,6 +131,10 @@
 					8FB18AFF3037AB9900B97356 = {
 						CreatedOnToolsVersion = 26.6;
 						LastSwiftMigration = 2660;
+					};
+					C10000053037AB9900B97356 = {
+						CreatedOnToolsVersion = 26.6;
+						TestTargetID = 8FB18AFF3037AB9900B97356;
 					};
 				};
 			};
@@ -101,12 +153,20 @@
 			projectRoot = "";
 			targets = (
 				8FB18AFF3037AB9900B97356 /* CalisthenicsJourney */,
+				C10000053037AB9900B97356 /* CalisthenicsJourneyTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		8FB18AFE3037AB9900B97356 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C10000083037AB9900B97356 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -123,7 +183,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		C10000073037AB9900B97356 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		C10000093037AB9900B97356 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8FB18AFF3037AB9900B97356 /* CalisthenicsJourney */;
+			targetProxy = C10000023037AB9900B97356 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		8FB18B0B3037AB9B00B97356 /* Debug */ = {
@@ -310,6 +385,47 @@
 			};
 			name = Release;
 		};
+		C100000A3037AB9900B97356 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.pierre.CalisthenicsJourneyTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/CalisthenicsJourney.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/CalisthenicsJourney";
+			};
+			name = Debug;
+		};
+		C100000B3037AB9900B97356 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.pierre.CalisthenicsJourneyTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/CalisthenicsJourney.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/CalisthenicsJourney";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -327,6 +443,15 @@
 			buildConfigurations = (
 				8FB18B0E3037AB9B00B97356 /* Debug */,
 				8FB18B0F3037AB9B00B97356 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C10000063037AB9900B97356 /* Build configuration list for PBXNativeTarget "CalisthenicsJourneyTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C100000A3037AB9900B97356 /* Debug */,
+				C100000B3037AB9900B97356 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
