@@ -433,6 +433,15 @@ it.
     completed changes accumulated only in the working tree.
 25. Do not amend, squash, rewrite published history, or force-push unless
     the project owner explicitly requests it.
+26. Before committing a checkpoint, inspect the working tree and
+    distinguish changes made for the current task from pre-existing or
+    unrelated changes. Commit only files and changes required for the
+    approved checkpoint. Do not modify, revert, stage, clean up, or include
+    unrelated working-tree changes without explicit project-owner approval.
+    Leave unrelated changes untouched and mention them in the checkpoint
+    handoff. Automatically generated or normalized project-file changes
+    must not be included unless they are required by the current
+    implementation.
 
 ## 25. Current development state
 
