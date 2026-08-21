@@ -284,6 +284,8 @@ Supported L-Sit Press
     ↓
 Single-Leg Lift
     ↓
+Seated Leg Raises
+    ↓
 Tuck L-Sit
     ↓
 One-Leg L-Sit
@@ -300,6 +302,8 @@ First Full L-Sit
 
 - Supported L-Sit Press remains a visible beginner node.
 - Single-Leg Lift remains a visible node.
+- Seated Leg Raises remain a visible mastery node rather than supporting training.
+- Seated Leg Raises represent the two-leg compression and coordination bridge between Single-Leg Lift and Tuck L-Sit.
 - Partial L-Sit / partial extension work is supporting training rather than a visible mastery node.
 - One-Leg L-Sit requires both sides.
 - **10 clean seconds in a Full L-Sit = L-Sit mastery.**
