@@ -73,14 +73,19 @@ progression evidence.
 
 ### Skills
 
-The central progression system: available/active/locked skills, skill
-trees, completed/current/future stages, prerequisites, and meaningful
-mastery milestones.
+The central progression system: visible/selectable skills, active/inactive
+goal selection, skill trees, completed/current/future stages,
+prerequisites, and meaningful mastery milestones.
 
 Skills include advanced movements and basic movement families. Examples:
 Handstand, Pull-up, L-Sit, Dips, Muscle-up, Push-up.
 
 A Push-up can itself be a skill tree with easier and harder variants.
+
+All skills should remain discoverable. The Skills area may present the same
+underlying progression through both a **node map** and a **categorized list**.
+A future/locked stage or incomplete prerequisite may affect progression
+state or guidance, but should not hide a skill from exploration.
 
 ## 4. No dedicated Progress tab for now
 
@@ -324,16 +329,39 @@ These belong naturally in Journey/Skills.
 
 Product philosophy: **"My achievements are real life."**
 
-## 17. Locked skills and prerequisites
+## 17. Skill availability, shared foundations, and prerequisites
 
-Some skills may require explicit prerequisites. Example: Muscle-up may
-depend on sufficient Pull-up and Dip development.
+Skills should remain **visible and selectable even when they are advanced**.
+A user should be able to inspect the full progression of any skill and may
+choose an advanced skill as one of their active goals without first
+completing an artificial unlock sequence.
 
-Prerequisites should be represented as data rather than hardcoded UI
-text.
+Advanced skills may have longer mastery paths that include a small number
+of meaningful foundational requirements before skill-specific stages.
+These foundations should reflect abilities that genuinely support the
+skill, not arbitrary game gates.
 
-Skill trees may eventually branch/connect, so do not design storage
-under the assumption that every skill is forever a single linear list.
+Previously demonstrated ability must carry forward. If workout history has
+already satisfied a requirement used by another skill path, that evidence
+must count there as well. The user should not be required to repeat an
+ability merely because it appears in a newly selected skill.
+
+Completed foundational parts should remain visible in the skill progression
+and appear completed rather than disappearing. This shows the user why
+their previous training has moved them further into a newly selected skill.
+
+Shared foundations must remain based on concrete requirements and logged
+evidence rather than vague artificial capability levels. Avoid overcrowding
+advanced skills with long prerequisite checklists; include only the minimum
+meaningful foundation requirements needed to make the progression useful.
+
+The maximum of 3 active skills controls **workout priority**, not which
+skills can accumulate valid progression evidence. Logged performance may
+satisfy requirements for inactive skills when the same real ability is
+relevant.
+
+Skill trees may eventually branch/connect, so do not design storage under
+the assumption that every skill is forever a single linear list.
 
 ## 18. Editability is core
 

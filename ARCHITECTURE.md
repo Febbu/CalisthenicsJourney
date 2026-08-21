@@ -429,8 +429,18 @@ A Skill should own or relate to:
 -   name;
 -   optional display icon/emoji;
 -   ordered or graph-connected stages;
--   skill-level prerequisites;
--   active/inactive selection state if that remains a product decision.
+-   shared/foundational requirements where relevant;
+-   one or more presentation category tags where useful;
+-   active/inactive selection state.
+
+Category tags are for discovery and filtering only. A skill may appear in
+multiple categories (for example Foundation + Push, or Pull + Core +
+Advanced). Categories must not determine mastery, prerequisites, or workout
+behavior.
+
+Skills remain visible/selectable independently of progression state. Active
+state means the WorkoutGenerator should prioritize that goal; it does not
+mean inactive skills are unable to receive valid progression evidence.
 
 A Skill must remain editable.
 
@@ -570,14 +580,14 @@ confirmation when the requirement's scope is separate sessions.
 
 ------------------------------------------------------------------------
 
-# 6. Generic unlock architecture
+# 6. Generic progression architecture
 
-Unlock logic must be generic and data-driven.
+Progression logic must be generic and data-driven.
 
 Do not write special methods such as:
 
 ``` swift
-unlockMuscleUp()
+unlockNamedSkillStage()
 unlockHandstandStage4()
 unlockLevel2()
 ```
@@ -595,23 +605,32 @@ Requirement state
         ↓
 ProgressionEngine
         ↓
-Unlockable entity becomes available/mastered
+Stage / level / shared requirement state changes
 ```
 
-Possible unlock targets include:
+Skills themselves are normally visible and selectable rather than hidden
+behind hard unlocks. Progression may still determine which stages are
+completed/current/future and whether a JourneyLevel is mastered.
 
--   next SkillStage;
--   another SkillStage branch;
--   a new Skill;
--   the next JourneyLevel;
--   a new exercise/progression;
--   another future unlockable entity.
+A requirement may be relevant to more than one skill path. The same logged
+evidence must be reusable wherever the same concrete ability is required.
+Do not duplicate or reset proof simply because a user activates a different
+skill.
+
+Possible progression consequences include:
+
+-   a SkillStage becoming completed/current;
+-   another SkillStage branch becoming relevant;
+-   shared foundational requirements appearing already completed;
+-   the next JourneyLevel becoming completed;
+-   a new exercise/progression becoming appropriate;
+-   another future progression consequence.
 
 ------------------------------------------------------------------------
 
-# 7. Unlock rule types
+# 7. Progression rule types
 
-Keep unlock rules simple but extensible.
+Keep progression rules simple but extensible.
 
 The engine should eventually support concepts such as:
 
@@ -622,7 +641,7 @@ Every prerequisite must be satisfied.
 Example:
 
 ``` text
-Unlock Skill X when:
+Complete Stage X when:
 - requirement A mastered
 AND
 - requirement B mastered
@@ -635,7 +654,7 @@ At least one prerequisite is sufficient.
 Example:
 
 ``` text
-Unlock alternate progression when:
+Make an alternate progression current when:
 - requirement A
 OR
 - requirement B
@@ -653,7 +672,7 @@ N distinct workout sessions
 
 ## PREREQUISITE ENTITY
 
-Another entity must already be mastered/unlocked.
+Another entity must already be mastered/completed.
 
 Examples:
 
@@ -680,10 +699,14 @@ It should be independent from SwiftUI.
 Possible responsibilities:
 
 -   determine whether a SkillStage is mastered;
--   determine whether the next stage becomes available;
--   determine whether a Skill becomes unlocked;
--   determine whether a JourneyLevel becomes completed/unlocked;
--   expose progression changes so the UI can show an unlock message.
+-   determine the user's current position in a skill progression;
+-   reuse qualifying evidence across every requirement that references the
+    same demonstrated ability;
+-   recognize already-satisfied foundational requirements when a new skill
+    is selected;
+-   determine whether a JourneyLevel becomes completed;
+-   expose progression changes so the UI can present meaningful mastery
+    feedback.
 
 The engine should not generate celebration UI.
 
@@ -863,7 +886,7 @@ A requirement can belong to different progression concepts.
 Examples:
 
 -   SkillStage mastery requirement;
--   Skill unlock requirement;
+-   shared/foundational skill requirement;
 -   JourneyLevel requirement.
 
 Avoid duplicating evaluation logic for each owner type.
@@ -876,6 +899,11 @@ Owner
 → RequirementEvaluator evaluates them
 → ProgressionEngine interprets completion for that owner
 ```
+
+Ownership must not make evidence exclusive. Multiple skill paths may define
+or reference requirements satisfied by the same real performance evidence.
+A workout result is global historical evidence and should not become
+"consumed" by one skill.
 
 ------------------------------------------------------------------------
 
@@ -1124,6 +1152,11 @@ Examples:
 
 A UI element belongs inside a feature when it only makes sense there.
 
+The Skills feature may expose multiple presentations, such as a node map
+and a categorized list. Both must derive from the same `Skill`,
+`SkillStage`, requirement, and `ProgressionEngine` data. They must never
+maintain separate progression state.
+
 Do not prematurely move every small View into a shared-components
 folder.
 
@@ -1189,7 +1222,7 @@ if exercise.name == "Push-ups" && reps >= 20 {
 
 ------------------------------------------------------------------------
 
-# 22. Example: correct generic unlock
+# 22. Example: correct generic stage progression
 
 Correct:
 
@@ -1219,23 +1252,29 @@ source code.
 
 ------------------------------------------------------------------------
 
-# 23. Example: cross-skill prerequisite
+# 23. Example: shared evidence across skills
 
-Conceptual Muscle-up unlock:
+Conceptual advanced-skill foundation:
 
 ``` text
-UnlockRule: ALL
+Planche path
 
-Prerequisite 1:
-Pull-up skill node X mastered
+Foundation requirement A:
+Concrete pushing requirement
 
-Prerequisite 2:
-Dip skill node Y mastered
+Foundation requirement B:
+Concrete core/support requirement
 ```
 
-The generic engine evaluates both.
+If earlier Push-up, L-Sit, or other training has already produced workout
+evidence satisfying one of those exact requirements, the
+`RequirementEvaluator` should report it as satisfied immediately when the
+Planche path is viewed or activated.
 
-No `if skill.name == "Muscle-up"` condition is necessary.
+The completed foundation remains visible in the Planche progression. It is
+not repeated, hidden, or manually copied from another skill.
+
+No `if skill.name == "Planche"` special case is necessary.
 
 ------------------------------------------------------------------------
 
@@ -1313,11 +1352,15 @@ High-value unit tests:
 
 ### ProgressionEngine
 
--   stage remains locked when prerequisites fail;
--   stage unlocks when ALL prerequisites pass;
--   ANY rule behavior;
--   level unlock;
--   cross-skill prerequisite.
+-   stage remains future/current as appropriate when requirements fail;
+-   stage becomes completed when required evidence passes;
+-   already-recorded evidence can satisfy a newly selected skill's
+    foundational requirement;
+-   the same evidence can satisfy equivalent requirements across multiple
+    skill paths without being consumed;
+-   inactive skills may reflect valid progress from global workout history;
+-   level completion;
+-   future branching/ANY behavior when those rules are implemented.
 
 ### WorkoutGenerator
 
@@ -1417,7 +1460,7 @@ Before adding visual polish:
 4.  Refine models so Skills/Stages can explicitly reference
     requirements.
 5.  Implement `RequirementEvaluator`.
-6.  Implement generic progression/unlock handling.
+6.  Implement generic progression handling.
 7.  Build active-skill selection.
 8.  Implement simple skill-driven `WorkoutGenerator`.
 9.  Add workout editing/override.
@@ -1439,7 +1482,7 @@ Unless the project owner explicitly changes them:
 -   Skills drive workout generation.
 -   Progression is requirement-driven.
 -   Mastery may require repeated confirmation across sessions.
--   Unlocks are generic/data-driven.
+-   Progression consequences are generic/data-driven.
 -   Overall Level and Skill progress are separate.
 -   Seed content is editable data.
 -   Views do not own training rules.
@@ -1453,6 +1496,12 @@ Unless the project owner explicitly changes them:
     and equipment constraints from product rules.
 -   Equipment changes the available training route, not the identity or
     mastery standard of a skill.
+-   Skills remain discoverable/selectable regardless of current progression
+    state; active selection controls workout priority, not visibility.
+-   Logged evidence is global and reusable across every relevant skill
+    requirement; progression evidence is never consumed by one path.
+-   Multiple Skills views must derive from the same progression source of
+    truth, and categories remain presentation-only metadata.
 
 ------------------------------------------------------------------------
 
@@ -1476,6 +1525,9 @@ Before implementing a structural change, confirm:
 -   If this is an optimization, was the bottleneck measured first?
 -   Does workout-generation logic respect available equipment without
     hardcoding exercise names or inventing misleading substitutions?
+-   Does this preserve shared historical evidence across skill paths?
+-   Does any Skills presentation accidentally create its own progression
+    state or use category tags as progression logic?
 
 If a proposed change violates an invariant, stop and ask the project
 owner.
@@ -1497,10 +1549,10 @@ RequirementEvaluator
 decides whether performance satisfies requirements
 
 ProgressionEngine
-decides what mastery/unlocks follow
+decides what mastery and current/future progression state follows
 
 WorkoutGenerator
-builds training plans from active skills/current stages
+builds training plans by prioritizing active skills/current needs
 
 SwiftData
 persists everything locally
