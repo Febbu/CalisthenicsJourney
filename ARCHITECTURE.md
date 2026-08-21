@@ -925,7 +925,167 @@ Do not implement sync logic until requested.
 
 ------------------------------------------------------------------------
 
-# 18. Components vs features
+# 18. Performance and resource principles
+
+CalisthenicsJourney should remain lightweight by default.
+
+This is not a mandate for premature micro-optimization. It is an
+architectural constraint that normal usage should stay fast, responsive,
+memory-conscious, and energy-efficient.
+
+The app is a local-first training tool with relatively small amounts of
+structured data. Core screens and workout entry should therefore feel
+effectively instant under normal use.
+
+The scalability guidance in this section is forward-looking. Direct
+queries and full-history evaluation are acceptable while they remain the
+smallest clear solution for the current data scale. Do not introduce
+caches, repository layers, migration infrastructure, or other complexity
+until measurement or an actual product need justifies them.
+
+## 18.1 Startup
+
+Keep launch-time work minimal.
+
+Do not:
+
+-   scan or evaluate the complete workout history synchronously on every
+    launch unless genuinely required;
+-   rebuild every skill tree at startup;
+-   perform expensive migrations repeatedly after they have completed;
+-   block initial UI presentation on work that can safely happen later;
+-   start unnecessary network requests, timers, or background tasks
+    during launch.
+
+Required migrations and first-install seed work should be bounded and
+idempotent. If migration work later becomes expensive at realistic data
+scale, measure it before adding version markers or other infrastructure
+to separate it from ordinary runtime work.
+
+## 18.2 Data loading
+
+Fetch only the data a screen or engine actually needs.
+
+As the amount of stored history grows, consider:
+
+-   narrow SwiftData queries;
+-   relevant recent/history slices when full history is unnecessary;
+-   targeted evaluation for requirements currently being displayed or
+    changed;
+-   lazy or on-demand loading for secondary history screens.
+
+Avoid loading the complete training database into memory merely for
+convenience once measurement shows that doing so is materially costly.
+The architecture should eventually handle long histories without
+requiring the user to delete old workouts.
+
+## 18.3 Recalculation
+
+Do not repeatedly recompute expensive derived state on every SwiftUI
+redraw.
+
+Examples of derived work that may eventually need careful handling:
+
+-   requirement confirmation counts;
+-   complete skill-tree state;
+-   generated workout plans;
+-   historical personal-record calculations;
+-   charts across long histories.
+
+Keep the source of truth clear. Cache derived results only when
+measurement shows a meaningful benefit and when the cache has a reliable
+invalidation/update path.
+
+Do not persist redundant derived state merely to avoid simple
+calculations.
+
+## 18.4 Background work and energy
+
+Background activity should be minimal.
+
+Do not add:
+
+-   continuous polling;
+-   constantly running timers outside active use;
+-   unnecessary location/background modes;
+-   frequent background refreshes;
+-   repeated database scans while the app is idle.
+
+Timers needed during an active workout should stop when no longer
+needed.
+
+Future iCloud synchronization should use platform-provided mechanisms
+rather than aggressive manual polling.
+
+## 18.5 Dependencies
+
+Prefer native Apple frameworks such as SwiftUI, SwiftData, Charts,
+CloudKit, HealthKit, and related platform APIs when they satisfy the
+requirement.
+
+Do not introduce a third-party framework for functionality that can be
+implemented clearly with native APIs unless the dependency provides
+substantial value.
+
+Every dependency adds potential:
+
+-   app size;
+-   startup cost;
+-   memory cost;
+-   update burden;
+-   security/supply-chain surface;
+-   architectural coupling.
+
+Dependencies should therefore be deliberate.
+
+## 18.6 Assets
+
+Keep bundled assets appropriately sized.
+
+Avoid:
+
+-   large decorative image packs;
+-   unnecessarily high-resolution assets;
+-   bundled video/audio that does not serve core functionality;
+-   duplicate asset variants that the platform can generate or scale
+    efficiently.
+
+The minimal visual philosophy should also help keep the binary and
+runtime footprint small.
+
+## 18.7 Measurement before optimization
+
+Do not guess at performance problems.
+
+When startup time, CPU, memory, database work, or energy use becomes a
+concern, measure it with appropriate Xcode/Instruments tooling before
+making significant optimization changes.
+
+Do not add speculative caches, background queues, persistence layers, or
+architectural complexity solely because they might be faster.
+
+The preferred sequence is:
+
+``` text
+observe a real performance concern
+→ measure
+→ identify the actual bottleneck
+→ make the smallest effective change
+→ measure again
+```
+
+## 18.8 Performance invariant
+
+> **Core screens and workout entry must not depend on network access or
+> heavy background computation and should feel immediate during normal
+> use.**
+
+Performance improvements must not compromise the product's sources of
+truth, editability, or correctness.
+
+------------------------------------------------------------------------
+
+# 19. Components vs features
 
 A UI component belongs in `Components` when it is reusable across
 features and has little feature-specific business logic.
@@ -944,7 +1104,7 @@ folder.
 
 ------------------------------------------------------------------------
 
-# 19. Example: correct exercise rendering
+# 20. Example: correct exercise rendering
 
 Correct:
 
@@ -975,7 +1135,7 @@ This is one of the most important architectural rules in the project.
 
 ------------------------------------------------------------------------
 
-# 20. Example: correct mastery evaluation
+# 21. Example: correct mastery evaluation
 
 Correct:
 
@@ -1004,7 +1164,7 @@ if exercise.name == "Push-ups" && reps >= 20 {
 
 ------------------------------------------------------------------------
 
-# 21. Example: correct generic unlock
+# 22. Example: correct generic unlock
 
 Correct:
 
@@ -1034,7 +1194,7 @@ source code.
 
 ------------------------------------------------------------------------
 
-# 22. Example: cross-skill prerequisite
+# 23. Example: cross-skill prerequisite
 
 Conceptual Muscle-up unlock:
 
@@ -1054,7 +1214,7 @@ No `if skill.name == "Muscle-up"` condition is necessary.
 
 ------------------------------------------------------------------------
 
-# 23. Minimalism over abstraction
+# 24. Minimalism over abstraction
 
 Do not create abstractions solely because they might become useful.
 
@@ -1070,7 +1230,7 @@ If not, keep the implementation direct.
 
 ------------------------------------------------------------------------
 
-# 24. Feature development rule
+# 25. Feature development rule
 
 When adding a new feature, identify which category it belongs to.
 
@@ -1094,7 +1254,7 @@ Try not to mix all four categories into one giant SwiftUI View.
 
 ------------------------------------------------------------------------
 
-# 25. Refactoring threshold
+# 26. Refactoring threshold
 
 Refactor when:
 
@@ -1110,7 +1270,7 @@ Do not refactor merely because a file exceeds an arbitrary line count.
 
 ------------------------------------------------------------------------
 
-# 26. Testing strategy
+# 27. Testing strategy
 
 Core mechanics should eventually be testable without opening the
 simulator.
@@ -1146,7 +1306,7 @@ Testing should focus on mechanics, not pixel-perfect UI.
 
 ------------------------------------------------------------------------
 
-# 27. Migration strategy
+# 28. Migration strategy
 
 Because content is editable and the model will evolve:
 
@@ -1161,7 +1321,7 @@ Future seed changes must not silently reset the user's skills/workouts.
 
 ------------------------------------------------------------------------
 
-# 28. Seed-data rules
+# 29. Seed-data rules
 
 Seed installation should:
 
@@ -1175,7 +1335,7 @@ creation.
 
 ------------------------------------------------------------------------
 
-# 29. Editing architecture
+# 30. Editing architecture
 
 Editing must operate on data models.
 
@@ -1222,7 +1382,7 @@ This is the primary reason the architecture must remain data-driven.
 
 ------------------------------------------------------------------------
 
-# 30. Recommended near-term implementation order
+# 31. Recommended near-term implementation order
 
 Before adding visual polish:
 
@@ -1244,7 +1404,7 @@ This order may change with explicit project-owner approval.
 
 ------------------------------------------------------------------------
 
-# 31. Architectural invariants
+# 32. Architectural invariants
 
 Unless the project owner explicitly changes them:
 
@@ -1260,10 +1420,14 @@ Unless the project owner explicitly changes them:
 -   Views do not own training rules.
 -   V1 remains local-first.
 -   Minimalism is preferred over speculative abstraction.
+-   Normal app use should remain lightweight, responsive, and
+    energy-conscious.
+-   Core screens and workout entry must not require network access or
+    heavy background computation.
 
 ------------------------------------------------------------------------
 
-# 32. Agent checklist before structural changes
+# 33. Agent checklist before structural changes
 
 Before implementing a structural change, confirm:
 
@@ -1278,13 +1442,16 @@ Before implementing a structural change, confirm:
 -   Does it keep local persistence simple?
 -   Is the abstraction actually necessary?
 -   Would a smaller implementation work just as well?
+-   Does this add unnecessary startup work, background activity, or broad
+    data loading?
+-   If this is an optimization, was the bottleneck measured first?
 
 If a proposed change violates an invariant, stop and ask the project
 owner.
 
 ------------------------------------------------------------------------
 
-# 33. Architecture summary
+# 34. Architecture summary
 
 The intended architecture is deliberately simple:
 
