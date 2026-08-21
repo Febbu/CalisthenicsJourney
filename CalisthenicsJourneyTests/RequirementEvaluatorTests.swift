@@ -111,21 +111,64 @@ final class RequirementEvaluatorTests: XCTestCase {
         XCTAssertEqual(evaluation.qualifyingSessionCount, 0)
     }
 
+    func testAllRequirementsForOwnerMustBeMastered() {
+        let repsExercise = Exercise(name: "Reps", metric: .reps)
+        let holdExercise = Exercise(name: "Hold", metric: .seconds)
+        let level = JourneyLevel(number: 1, name: "Test Level")
+        let repsRequirement = Requirement(
+            title: "Reps requirement",
+            exerciseID: repsExercise.id,
+            metric: .reps,
+            targetReps: 10,
+            confirmationsNeeded: 1,
+            journeyLevel: level
+        )
+        let holdRequirement = Requirement(
+            title: "Hold requirement",
+            exerciseID: holdExercise.id,
+            metric: .seconds,
+            targetSeconds: 20,
+            confirmationsNeeded: 1,
+            journeyLevel: level
+        )
+        let repsSession = session(exercise: repsExercise, reps: 10)
+
+        XCTAssertFalse(
+            RequirementEvaluator.areAllMastered(
+                [repsRequirement, holdRequirement],
+                against: [repsSession]
+            )
+        )
+
+        let holdSession = session(exercise: holdExercise, seconds: 20)
+        XCTAssertTrue(
+            RequirementEvaluator.areAllMastered(
+                [repsRequirement, holdRequirement],
+                against: [repsSession, holdSession]
+            )
+        )
+    }
+
+    func testOwnerWithoutRequirementsIsNotAutomaticallyMastered() {
+        XCTAssertFalse(RequirementEvaluator.areAllMastered([], against: []))
+    }
+
     private func makeRequirement(
         exercise: Exercise,
         metric: RequirementMetric,
         targetReps: Int? = nil,
         targetWeight: Double? = nil,
         targetSeconds: Int? = nil
-    ) -> LevelRequirement {
-        LevelRequirement(
+    ) -> Requirement {
+        Requirement(
             title: "Editable requirement",
             exerciseID: exercise.id,
             metric: metric,
             targetReps: targetReps,
             targetWeight: targetWeight,
             targetSeconds: targetSeconds,
-            confirmationsNeeded: 2
+            confirmationsNeeded: 2,
+            journeyLevel: JourneyLevel(number: 1, name: "Test Level")
         )
     }
 

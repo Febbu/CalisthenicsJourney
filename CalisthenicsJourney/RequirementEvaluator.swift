@@ -15,7 +15,7 @@ struct RequirementEvaluation {
 
 enum RequirementEvaluator {
     static func evaluate(
-        _ requirement: LevelRequirement,
+        _ requirement: Requirement,
         against sessions: [WorkoutSession]
     ) -> RequirementEvaluation {
         let qualifyingSessionIDs = Set(
@@ -30,9 +30,18 @@ enum RequirementEvaluator {
         )
     }
 
+    static func areAllMastered(
+        _ requirements: [Requirement],
+        against sessions: [WorkoutSession]
+    ) -> Bool {
+        !requirements.isEmpty && requirements.allSatisfy {
+            evaluate($0, against: sessions).isMastered
+        }
+    }
+
     private static func sessionQualifies(
         _ session: WorkoutSession,
-        for requirement: LevelRequirement
+        for requirement: Requirement
     ) -> Bool {
         session.exerciseLogs.contains { log in
             guard log.exerciseID == requirement.exerciseID else { return false }
@@ -42,7 +51,7 @@ enum RequirementEvaluator {
 
     private static func setQualifies(
         _ set: SetLog,
-        for requirement: LevelRequirement
+        for requirement: Requirement
     ) -> Bool {
         switch requirement.metric {
         case .reps:

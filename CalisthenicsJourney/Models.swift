@@ -163,6 +163,9 @@ final class JourneyLevel {
     @Relationship(deleteRule: .cascade, inverse: \LevelRequirement.level)
     var requirements: [LevelRequirement] = []
 
+    @Relationship(deleteRule: .cascade, inverse: \Requirement.journeyLevel)
+    var genericRequirements: [Requirement] = []
+
     init(number: Int, name: String, isUnlocked: Bool = false) {
         self.id = UUID()
         self.number = number
@@ -219,6 +222,79 @@ final class LevelRequirement {
 }
 
 @Model
+final class Requirement {
+    @Attribute(.unique) var id: UUID
+    var title: String
+    var exerciseID: UUID?
+    var metricRaw: String
+    var targetReps: Int?
+    var targetWeight: Double?
+    var targetSeconds: Int?
+    var confirmationsNeeded: Int
+    var createdAt: Date
+    var updatedAt: Date
+    var journeyLevel: JourneyLevel?
+    var skillStage: SkillStage?
+
+    var metric: RequirementMetric {
+        get { RequirementMetric(rawValue: metricRaw) ?? .reps }
+        set { metricRaw = newValue.rawValue }
+    }
+
+    var hasExactlyOneOwner: Bool {
+        (journeyLevel != nil) != (skillStage != nil)
+    }
+
+    init(
+        id: UUID = UUID(),
+        title: String,
+        exerciseID: UUID? = nil,
+        metric: RequirementMetric,
+        targetReps: Int? = nil,
+        targetWeight: Double? = nil,
+        targetSeconds: Int? = nil,
+        confirmationsNeeded: Int = 2,
+        journeyLevel: JourneyLevel
+    ) {
+        self.id = id
+        self.title = title
+        self.exerciseID = exerciseID
+        self.metricRaw = metric.rawValue
+        self.targetReps = targetReps
+        self.targetWeight = targetWeight
+        self.targetSeconds = targetSeconds
+        self.confirmationsNeeded = confirmationsNeeded
+        self.createdAt = .now
+        self.updatedAt = .now
+        self.journeyLevel = journeyLevel
+    }
+
+    init(
+        id: UUID = UUID(),
+        title: String,
+        exerciseID: UUID? = nil,
+        metric: RequirementMetric,
+        targetReps: Int? = nil,
+        targetWeight: Double? = nil,
+        targetSeconds: Int? = nil,
+        confirmationsNeeded: Int = 2,
+        skillStage: SkillStage
+    ) {
+        self.id = id
+        self.title = title
+        self.exerciseID = exerciseID
+        self.metricRaw = metric.rawValue
+        self.targetReps = targetReps
+        self.targetWeight = targetWeight
+        self.targetSeconds = targetSeconds
+        self.confirmationsNeeded = confirmationsNeeded
+        self.createdAt = .now
+        self.updatedAt = .now
+        self.skillStage = skillStage
+    }
+}
+
+@Model
 final class Skill {
     @Attribute(.unique) var id: UUID
     var name: String
@@ -248,6 +324,9 @@ final class SkillStage {
     var isCurrent: Bool
     var isCompleted: Bool
     var skill: Skill?
+
+    @Relationship(deleteRule: .cascade, inverse: \Requirement.skillStage)
+    var requirements: [Requirement] = []
 
     init(
         name: String,

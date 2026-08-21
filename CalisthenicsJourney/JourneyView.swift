@@ -17,12 +17,12 @@ struct JourneyView: View {
                             .foregroundStyle(.secondary)
                         Text(current.name.uppercased())
                             .font(.largeTitle.bold())
-                        Text("Master every requirement twice to advance.")
+                        Text("Master every requirement to advance.")
                             .foregroundStyle(.secondary)
                     }
 
                     VStack(spacing: 12) {
-                        ForEach(current.requirements) { requirement in
+                        ForEach(current.genericRequirements) { requirement in
                             RequirementCard(
                                 requirement: requirement,
                                 evaluation: RequirementEvaluator.evaluate(
@@ -54,7 +54,7 @@ struct JourneyView: View {
 }
 
 private struct RequirementCard: View {
-    let requirement: LevelRequirement
+    let requirement: Requirement
     let evaluation: RequirementEvaluation
 
     var body: some View {
