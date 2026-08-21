@@ -43,34 +43,34 @@ enum SeedData {
         context.insert(level1)
 
         let requirements = [
-            LevelRequirement(
+            Requirement(
                 title: "20 clean push-ups",
                 exerciseID: pushups.id,
                 metric: .reps,
                 targetReps: 20,
                 confirmationsNeeded: 2,
-                level: level1
+                journeyLevel: level1
             ),
-            LevelRequirement(
+            Requirement(
                 title: "30s controlled wall handstand",
                 exerciseID: handstand.id,
                 metric: .seconds,
                 targetSeconds: 30,
                 confirmationsNeeded: 2,
-                level: level1
+                journeyLevel: level1
             ),
-            LevelRequirement(
+            Requirement(
                 title: "30s hollow-body hold",
                 exerciseID: hollow.id,
                 metric: .seconds,
                 targetSeconds: 30,
                 confirmationsNeeded: 2,
-                level: level1
+                journeyLevel: level1
             )
         ]
 
         requirements.forEach(context.insert)
-        level1.requirements = requirements
+        level1.genericRequirements = requirements
 
         let handstandSkill = Skill(name: "Handstand", emoji: "🤸")
         context.insert(handstandSkill)

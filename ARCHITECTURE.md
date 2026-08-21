@@ -1179,6 +1179,14 @@ creation.
 
 Editing must operate on data models.
 
+A generic `Requirement` currently stores optional `journeyLevel` and
+`skillStage` relationships. Its creation APIs establish the invariant
+that exactly one owner is set. Because those relationships remain
+mutable for SwiftData and future editing, the editing system must
+validate that it never saves a requirement with both owners or with no
+owner. Do not add a polymorphic persistence abstraction merely to
+enforce this invariant.
+
 Example:
 
 ``` text

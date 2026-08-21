@@ -38,6 +38,7 @@ final class RequirementMigrationTests: XCTestCase {
         XCTAssertEqual(migrated.journeyLevel?.id, level.id)
         XCTAssertNil(migrated.skillStage)
         XCTAssertTrue(migrated.hasExactlyOneOwner)
+        XCTAssertEqual(level.genericRequirements.map(\.id), [legacy.id])
 
         let preservedLegacy = try context.fetch(FetchDescriptor<LevelRequirement>())
         XCTAssertEqual(preservedLegacy.count, 1)
@@ -89,6 +90,22 @@ final class RequirementMigrationTests: XCTestCase {
         XCTAssertTrue(stageRequirement.hasExactlyOneOwner)
         XCTAssertNil(stageRequirement.journeyLevel)
         XCTAssertNotNil(stageRequirement.skillStage)
+    }
+
+    func testFreshInstallSeedsOnlyGenericRequirements() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+
+        SeedData.installIfNeeded(context: context, existingExerciseCount: 0)
+
+        let genericRequirements = try context.fetch(FetchDescriptor<Requirement>())
+        let legacyRequirements = try context.fetch(FetchDescriptor<LevelRequirement>())
+        let level = try XCTUnwrap(context.fetch(FetchDescriptor<JourneyLevel>()).first)
+
+        XCTAssertEqual(genericRequirements.count, 3)
+        XCTAssertTrue(legacyRequirements.isEmpty)
+        XCTAssertEqual(level.genericRequirements.count, 3)
+        XCTAssertTrue(level.genericRequirements.allSatisfy(\.hasExactlyOneOwner))
     }
 
     private func makeContainer() throws -> ModelContainer {
