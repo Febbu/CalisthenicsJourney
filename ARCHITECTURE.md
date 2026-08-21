@@ -716,6 +716,12 @@ as the only possible progression model forever.
 A simple implementation can still use order initially, but stable stage
 IDs should make later graph connections possible.
 
+Stage order must not be treated as automatic validation implication. A
+harder demonstrated ability may validate explicitly related dependent
+nodes, while independent competencies still require their own evidence.
+Future implementation should represent those implication relationships
+as data and must not apply a global "complete every earlier node" rule.
+
 A future node may have:
 
 ``` text

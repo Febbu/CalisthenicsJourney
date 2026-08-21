@@ -120,6 +120,47 @@ Preparation blocks:
 
 Exact preparation exercises and generator behavior are still to be designed.
 
+## 1.8 Mastery nodes may be dependent or independent
+
+Progression order and validation implication are not always identical.
+
+A **dependent node** represents an ability where successfully demonstrating a
+harder ability with the required form and standard can logically prove one or
+more easier abilities beneath it. For example:
+
+```text
+10 Strict Push-ups
+→ implies 5 Strict Push-ups
+→ implies 1 Strict Push-up
+→ implies Knee Push-up
+→ implies Incline Push-up
+→ implies Wall Push-up
+```
+
+Only explicitly implied dependent nodes may be validated this way. This allows
+experienced users to establish an appropriate starting position without being
+forced to perform obviously easier versions merely to check progression boxes.
+
+An **independent node** represents a distinct competency that must be
+demonstrated separately. A later or more difficult-looking achievement does not
+automatically validate it. For example, a 10-second Freestanding Handstand does
+not automatically prove Safe Handstand Bail; the bail is a separate safety and
+control competency.
+
+Do not apply a global rule that completing a node automatically completes every
+earlier node. Future content and architecture should represent explicit
+implication relationships between demonstrated abilities and the dependent
+nodes they validate. Independent nodes must remain outside those relationships.
+The detailed dependent/independent classification of the nine V1 trees is still
+to be approved alongside exercise and validation design.
+
+This behavior should eventually support initial athlete placement, automatic
+progression validation, non-linear and mixed-competency trees, and a future
+`Too Easy` workout action. `Too Easy` does not grant mastery; it only lets the
+user try an appropriate harder progression, whose successful performance may
+provide evidence. A future `Too Hard` action may offer an appropriate regression
+without removing mastery the user has already earned.
+
 ---
 
 # 2. V1 skill catalog
