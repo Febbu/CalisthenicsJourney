@@ -280,7 +280,9 @@ deactivated and reactivated without losing earned progress.
 Generated workouts should normally fit within about **30–40 minutes** and
 must not exceed **8 exercises**. When multiple active skills benefit from
 the same exercise or training quality, the generator should prefer useful
-overlap rather than simply stacking separate exercise lists.
+overlap rather than simply stacking separate exercise lists. Do not add filler
+exercises merely to reach the duration target; workout duration should emerge
+from useful training, optional preparation, and athlete-controlled rest.
 
 Equipment availability changes the **training route**, not the underlying
 skill goal or mastery standard. The app may choose different supporting
@@ -421,12 +423,14 @@ unnecessary dialogs and confirmation steps.
 
 The V1 skill catalog, mastery trees, default exercise sequences, and
 training-prescription philosophy are approved in `SKILLS.md`, while the
-remaining formulas and workout behavior are still under discussion.
+remaining training details and workout behavior are still under discussion.
 
 Do not assume these prototype seed choices are final:
 
 -   additional exercise choices beyond the approved default sequences;
--   exact rest, frequency, and technique/attempt details;
+-   exercise-specific rest, weekly frequency, and individual
+    technique/control standards;
+-   detailed multi-skill conflict/trimming behavior and coaching presentation;
 -   workout-generation behavior.
 
 Before substantially expanding training content, discuss additions to the
@@ -449,6 +453,13 @@ spam, excessive glow/gradients, and custom assets merely to look
 game-like.
 
 Minimalism may be a permanent part of the product identity.
+
+Meaningful feedback should respond to real training events such as completing
+or exceeding a target, setting a personal best, validating a mastery node,
+receiving a new prescription, completing a workout, or repeating an incomplete
+target. The detailed emotional presentation is a later UI decision. Real
+progression remains the primary game loop; do not add artificial reward systems
+to substitute for it.
 
 ## 23. Core loop
 
@@ -524,8 +535,8 @@ The repository has an initial V1 Git checkpoint.
 The current prototype is a foundation, not the final information
 architecture.
 
-The next major design task is to finalize **remaining prescription
-formulas, validation standards, and multi-skill workout behavior** before
+The next major design task is to finalize **remaining validation standards,
+frequency, and multi-skill workout behavior** before
 broad editing interfaces or visual polish.
 
 ## 26. Product test

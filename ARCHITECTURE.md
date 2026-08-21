@@ -274,6 +274,7 @@ It should eventually contain data such as:
 -   semantic category if useful;
 -   equipment requirements where relevant;
 -   progression guidance where relevant;
+-   optional lightweight coaching guidance where relevant;
 -   creation/update timestamps.
 
 Progression guidance should describe how the exercise is normally trained
@@ -283,6 +284,10 @@ variation. Keep this representation small and add new progression types
 only when the product needs them.
 
 It should **not** contain UI-specific state.
+
+Coaching guidance is explanatory content, not progression state. It may later
+attach to an Exercise or SkillStage without becoming a requirement that the
+athlete must view or complete.
 
 An Exercise does not know which SwiftUI screen renders it.
 
@@ -564,6 +569,12 @@ not qualifying sets.
 If one session contains three qualifying sets, that still counts as one
 confirmation when the requirement's scope is separate sessions.
 
+Technique/control requirements may use successful-attempt confirmation rather
+than rep or duration thresholds. The evaluator must distinguish a logged
+attempt from an athlete-confirmed successful demonstration. Coaching content
+and whether it was viewed must remain outside this evaluation. V1 does not
+require automated camera, sensor, or form-recognition judgment.
+
 ------------------------------------------------------------------------
 
 # 6. Generic progression architecture
@@ -756,6 +767,12 @@ Product constraints for generation:
 -   prefer useful exercise overlap when multiple skills need similar work;
 -   adapt supporting exercises to available equipment without changing the
     underlying skill mastery requirement.
+
+For multiple active skills, prefer a direct pipeline: gather exercises linked
+to relevant current stages, combine them, deduplicate genuinely shared
+exercises, and keep the result manageable. Do not add filler solely to reach a
+duration target or introduce a complex scoring/optimization system before
+specific conflict or trimming needs are established.
 
 Equipment should be modeled as data (for example, pull-up bar, resistance
 band, dumbbell, cable machine) rather than inferred from exercise names.
@@ -1438,8 +1455,8 @@ This is the primary reason the architecture must remain data-driven.
 
 Before adding visual polish:
 
-1.  Finalize the deferred prescription formulas, validation standards,
-    and workout-combination behavior identified in `SKILLS.md`.
+1.  Finalize the deferred validation standards, frequency details, and
+    workout-combination behavior identified in `SKILLS.md`.
 2.  Remove the dedicated Progress tab from primary navigation.
 3.  Preserve workout history as a secondary destination.
 4.  Refine models so Skills/Stages can explicitly reference

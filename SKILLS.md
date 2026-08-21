@@ -10,9 +10,9 @@ It complements `AGENTS.md` and `ARCHITECTURE.md`.
 - `ARCHITECTURE.md` protects software structure and implementation boundaries.
 - `SKILLS.md` protects the approved V1 skill catalog, mastery trees, and training-content decisions.
 
-The V1 prescription philosophy is defined below. Its implementation formulas,
-remaining exercise-specific details, rest periods, frequency, and workout-
-generation behavior are still under discussion.
+The V1 prescription philosophy is defined below. Its implementation details,
+remaining exercise-specific standards, frequency, and workout-generation
+behavior are still under discussion.
 
 Do not silently redesign these skill trees. If a progression node or mastery standard appears to need changing, explain the proposed change to the project owner and obtain approval first.
 
@@ -188,6 +188,18 @@ When practical, training toward a node should directly practice its target
 movement. Previously mastered or easier versions may add volume or lower-
 difficulty practice. Use a special bridge exercise only when it clearly closes
 a meaningful gap.
+
+## 1.10 Coaching is lightweight, optional help
+
+Progression determines what the athlete should achieve. Coaching helps the
+athlete understand how to achieve it. Coaching content must never become a
+progression prerequisite merely because it exists.
+
+V1 coaching should remain concise, optional, easy to access, and out of the way
+when it is not needed. It may eventually include short instructions, a few
+important form cues, common mistakes, relevant safety information, and optional
+visual or video media. Do not require the athlete to read coaching before
+performing an exercise, and do not design a large coaching curriculum for V1.
 
 ---
 
@@ -1252,7 +1264,30 @@ You may try to beat your best.
 
 Any performance beyond the target must still be recorded as actual reality.
 
-## 12.9 Holds and timers
+## 12.9 Technique and control use successful-attempt confirmation
+
+Some technique, control, coordination, or safety competencies do not fit normal
+rep or hold prescriptions. Examples may include Safe Handstand Bail,
+Handstand Kick-Up, transitions, and other competencies whose meaningful
+evidence is successful execution.
+
+For V1, these use **successful-attempt confirmation**:
+
+```text
+Attempted
+≠
+Successfully demonstrated
+```
+
+Trying a competency is not mastery evidence. The athlete must confirm that it
+was successfully performed to the required standard. V1 does not require
+camera analysis, sensors, or automated form recognition to judge the movement.
+
+Do not invent a mandatory number of attempts for every technique/control node.
+The exact confirmation UI and the approved performance standard for each such
+competency remain later content and UI decisions.
+
+## 12.10 Holds and timers
 
 Hold-based movements follow the same calibration and progressive-overload
 philosophy as rep-based movements. An in-app timer may eventually be offered as
@@ -1262,7 +1297,30 @@ For movements such as Handstand, Front Lever, Planche, and L-Sit, the athlete
 may enter the achieved duration after the attempt when interacting with the
 phone during the hold is impractical.
 
-## 12.10 Equipment philosophy
+## 12.11 Rest is recommended, not enforced
+
+For normal strength-oriented V1 training, **90 seconds is the default rest
+recommendation between sets**. It is a pacing aid, not a gate:
+
+```text
+Set complete
+
+Recommended rest:
+1:30
+
+[ Start timer ]   [ Skip ]
+```
+
+The exact UI is not locked by this example. Rest may be optionally timed,
+skipped, or extended, and the athlete remains in control of when to continue.
+They may continue after approximately 60 seconds if ready, or rest for 2
+minutes, 2.5 minutes, or longer when a demanding exercise requires it.
+
+The app must not force the athlete to wait for a timer, punish a different rest
+duration, reduce progression, or mark a workout failed because rest was shorter
+or longer than recommended. Rest duration is not progression evidence.
+
+## 12.12 Equipment philosophy
 
 Core V1 progression should prioritize bodyweight and minimal necessary
 calisthenics equipment. Some skills inherently require an appropriate structure
@@ -1286,14 +1344,38 @@ skill sequences.
 
 ---
 
-# 13. Prescription decisions still deferred
+# 13. V1 multi-skill workout assembly
+
+Multi-skill workout generation should remain simple. For the active skills:
+
+1. determine the exercises relevant to their current stages;
+2. combine those candidate exercises;
+3. deduplicate genuinely shared exercises where appropriate;
+4. avoid filler exercises added merely to make the workout appear larger; and
+5. keep the final workout manageable.
+
+The approved trees and training sequences provide the core exercise content.
+Do not add accessory work solely to fill workout space. Optional preparation
+remains separate from the main required exercise count as already documented.
+
+Workout duration should emerge from relevant exercises, the normal set
+structure, optional preparation, and athlete-controlled rest. Favor useful,
+manageable training over filling an arbitrary duration target. Detailed
+conflict resolution, trimming, and duration optimization remain implementation
+and testing decisions; do not introduce a complex scoring or optimization
+algorithm without a demonstrated need.
+
+---
+
+# 14. Prescription and workout decisions still deferred
 
 Do not yet implement or finalize:
 
-- detailed technique/attempt prescriptions;
-- workout-combination logic across multiple active skills;
-- exact rest periods;
+- individual technique/control standards and confirmation UI;
+- detailed multi-skill conflict resolution and trimming behavior;
+- exercise-specific rest recommendations beyond the 90-second default;
 - weekly frequency;
+- richer coaching presentation and media;
 - application models or seed data;
 - workout-generator behavior or UI.
 
