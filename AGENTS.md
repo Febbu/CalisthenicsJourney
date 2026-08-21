@@ -226,19 +226,20 @@ becomes the previous result next time.
 For rep-range strength work, the intended foundation is double
 progression.
 
-The goal is gradual improvement, not maximal effort on every set. Users
-should be encouraged to start with a comfortable load or variation,
-leave some good reps in reserve, and let the first real workout establish
-their practical baseline.
+The goal is gradual improvement, not maximal effort on every set. A first
+skill workout should calibrate a comfortable starting estimate with good
+form and capacity remaining. Subsequent normal multi-set performance,
+especially the first normal workout, establishes practical training
+capacity as defined in `SKILLS.md`.
 
 For typical supporting strength exercises, **8–12 reps is the default
 starting range** unless the exercise or training purpose calls for a
 different prescription. This is a default, not a universal rule.
 
 The user should choose a resistance that allows controlled reps without
-maximal effort. The first workout establishes a practical baseline.
-Future workouts should aim for gradual improvement within the prescribed
-range.
+maximal effort. Future workouts should aim for gradual improvement within
+the prescribed range. V1 skill-movement prescriptions follow the
+calibration and equal-set principles in `SKILLS.md`.
 
 Example: Shoulder Press `3 × 8–12`.
 
@@ -416,17 +417,17 @@ Current principles:
 Workout UX must remain fast because it is used between real sets. Avoid
 unnecessary dialogs and confirmation steps.
 
-## 21. Supporting training content is NOT finalized
+## 21. Remaining training content is NOT finalized
 
-The V1 skill catalog, mastery trees, and default exercise sequences are
-approved in `SKILLS.md`, but detailed prescriptions and workout behavior
-are still under discussion.
+The V1 skill catalog, mastery trees, default exercise sequences, and
+training-prescription philosophy are approved in `SKILLS.md`, while the
+remaining formulas and workout behavior are still under discussion.
 
 Do not assume these prototype seed choices are final:
 
 -   additional exercise choices beyond the approved default sequences;
--   training prescriptions and progression rules;
--   exact sets, reps, hold times, rest, and preparation details;
+-   calibration, hold-increment, and accelerated-progression formulas;
+-   exact rest, frequency, and technique/attempt details;
 -   workout-generation behavior.
 
 Before substantially expanding training content, discuss additions to the
@@ -524,9 +525,9 @@ The repository has an initial V1 Git checkpoint.
 The current prototype is a foundation, not the final information
 architecture.
 
-The next major design task is to finalize **training prescriptions and
-validation standards for the approved skill trees and exercise
-sequences** before broad editing interfaces or visual polish.
+The next major design task is to finalize **remaining prescription
+formulas, validation standards, and multi-skill workout behavior** before
+broad editing interfaces or visual polish.
 
 ## 26. Product test
 

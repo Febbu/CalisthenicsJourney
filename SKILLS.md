@@ -10,9 +10,9 @@ It complements `AGENTS.md` and `ARCHITECTURE.md`.
 - `ARCHITECTURE.md` protects software structure and implementation boundaries.
 - `SKILLS.md` protects the approved V1 skill catalog, mastery trees, and training-content decisions.
 
-The detailed training prescriptions, set/rep schemes, rest periods, progression
-rules, and workout-generation behavior are still under discussion and will be
-added later.
+The V1 prescription philosophy is defined below. Its implementation formulas,
+remaining exercise-specific details, rest periods, frequency, and workout-
+generation behavior are still under discussion.
 
 Do not silently redesign these skill trees. If a progression node or mastery standard appears to need changing, explain the proposed change to the project owner and obtain approval first.
 
@@ -881,29 +881,210 @@ Recommended optional preparation:
 
 ---
 
-# 12. Training prescriptions still to be designed
+# 12. V1 training-prescription philosophy
 
-The nine V1 mastery trees and the default exercise sequences above are approved,
-but their detailed training prescriptions and generation behavior are not yet
-finalized.
+## 12.1 The first workout is calibration
 
-For each transition, the project still needs to define:
+The first workout for a selected skill is calibration rather than normal
+training. Its purpose is to establish a comfortable starting estimate without
+exhausting the athlete or testing their absolute maximum.
 
-- exercise roles;
-- sets;
-- reps;
-- hold times;
-- assistance levels;
-- progression rules;
-- rest periods;
-- frequency considerations;
-- preparation needs;
-- equipment alternatives;
-- objective form/ROM standards;
-- what evidence validates technique/control nodes that are not simple rep or duration thresholds.
+The athlete should choose the variation they believe is appropriate from the
+available progression options, perform a comfortable effort with good form and
+some capacity remaining, and record what they actually performed.
 
-The next major content-design task is to define how much, how often, and under
-what progression rules the approved exercises should be trained. Additional
-exercise choices require approval rather than being inferred from this document.
+Calibration should capture the relevant dimensions of the movement:
 
-Do not prematurely hardcode the current trees as special-case application logic. They remain editable product content and should ultimately be represented through the generic Skill / SkillStage / Requirement / exercise architecture defined by the project.
+- movement or variation performed;
+- repetitions for rep-based movements;
+- hold duration for hold-based movements;
+- left/right performance where applicable;
+- appropriate attempt or quality information for technique/control movements
+  once that design is finalized.
+
+The exact formula that converts calibration evidence into the first normal-
+workout prescription remains undecided.
+
+## 12.2 Normal workouts establish working capacity
+
+After calibration, normal workouts use actual multi-set performance to learn
+the athlete's working capacity. The first normal workout is especially useful
+as the strengthening and training baseline.
+
+Evaluate the full workout rather than only the best single set:
+
+```text
+Target:
+3 × 3 Push-ups
+
+Actual:
+4 / 4 / 3
+```
+
+The complete three-set result describes working capacity more usefully than a
+best set of 4 alone.
+
+## 12.3 Three equal sets are the V1 default
+
+For normal rep- and hold-based strength work, **3 sets are the default
+prescription structure**. Default set targets should be equal and predictable.
+
+Prefer:
+
+```text
+3 × 5
+```
+
+over an unnecessarily irregular prescription such as:
+
+```text
+11 / 13 / 8 / 12 / 16
+```
+
+Uneven target prescriptions are not part of the V1 default unless a specific
+future training need justifies them. Three sets are a default, not a universal
+rule for every exercise; technique/control work may eventually use attempts or
+another appropriate structure.
+
+## 12.4 Do not prescribe failure by default
+
+Normal prescriptions should be conservative enough to support clean
+repetitions, good technique, manageable fatigue, and repeatable training. The
+athlete is not required to reach muscular failure. Personal-best attempts and
+performance beyond the target are optional.
+
+## 12.5 Progressive overload
+
+Progressive overload should remain simple and understandable. For rep-based
+work, the approved default direction is:
+
+```text
+3 × 3
+→ 3 × 4
+→ 3 × 5
+→ ...
+```
+
+After the athlete successfully completes the entire prescribed workout, the
+next relevant workout may increase the target. Default rep progression should
+generally add **1 repetition per set**.
+
+Hold-based work follows the same concept:
+
+```text
+3 × 5 seconds
+→ slightly longer equal holds
+→ slightly longer equal holds
+```
+
+The exact default number of seconds added after a successful hold prescription
+is not yet finalized.
+
+## 12.6 Incomplete workouts repeat before regression
+
+One unsuccessful session should not immediately regress the athlete. If the
+full prescription is incomplete, repeat the same prescription at the next
+relevant workout by default:
+
+```text
+Target:
+3 × 5
+
+Actual:
+5 / 4 / 3
+
+Next workout:
+3 × 5 again
+```
+
+Already-earned mastery is never removed by an incomplete workout.
+
+## 12.7 Performance above target is useful evidence
+
+The athlete should record actual performance even when it exceeds the target:
+
+```text
+Target:
+3 × 3
+
+Actual:
+6 / 5 / 4
+```
+
+Significant overperformance is evidence that working capacity may be higher
+than the current prescription. A future adaptive system may progress faster
+than the normal +1 path, but the formula for deciding when and by how much
+remains explicitly undecided.
+
+## 12.8 Personal bests motivate; they do not prescribe
+
+The prescribed target represents what the athlete should train today. A shown
+previous or personal best is an optional challenge, not a requirement to set a
+new record every workout.
+
+```text
+Today's target:
+3 × 5 Push-ups
+
+Best:
+7 reps
+
+Feeling strong?
+You may try to beat your best.
+```
+
+Any performance beyond the target must still be recorded as actual reality.
+
+## 12.9 Holds and timers
+
+Hold-based movements follow the same calibration and progressive-overload
+philosophy as rep-based movements. An in-app timer may eventually be offered as
+a convenience, but it must not be required for progression.
+
+For movements such as Handstand, Front Lever, Planche, and L-Sit, the athlete
+may enter the achieved duration after the attempt when interacting with the
+phone during the hold is impractical.
+
+## 12.10 Equipment philosophy
+
+Core V1 progression should prioritize bodyweight and minimal necessary
+calisthenics equipment. Some skills inherently require an appropriate structure
+such as a pull-up bar or equivalent hanging/support equipment; minimal equipment
+does not mean literally zero equipment.
+
+Gym machines and additional equipment may later offer optional supplemental
+work or alternatives without becoming unnecessary progression barriers.
+Examples include:
+
+- TRX or another suspension trainer;
+- resistance bands;
+- lat pulldown;
+- chest press;
+- leg press;
+- guided squat rack;
+- other gym equipment.
+
+These machine exercises are not additions to the currently approved default
+skill sequences.
+
+---
+
+# 13. Prescription decisions still deferred
+
+Do not yet implement or finalize:
+
+- calibration-to-prescription formulas;
+- exact hold-time progression increments;
+- accelerated progression formulas for significant overperformance;
+- detailed technique/attempt prescriptions;
+- workout-combination logic across multiple active skills;
+- exact rest periods;
+- weekly frequency;
+- application models or seed data;
+- workout-generator behavior or UI.
+
+Additional exercise choices require approval rather than being inferred from
+this document. Do not hardcode the current trees, sequences, or prescriptions as
+name-based special-case application logic. They remain editable product content
+that should ultimately use the generic Skill / SkillStage / Requirement /
+exercise architecture defined by the project.
