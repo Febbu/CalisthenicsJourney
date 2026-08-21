@@ -1062,7 +1062,8 @@ performance beyond the target are optional.
 ## 12.5 Progressive overload
 
 Progressive overload should remain simple and understandable. For rep-based
-and hold-based work, successful completion of the entire prescription
+and hold-based work, successful completion of the entire prescription uses the
+athlete's actual three-set performance to establish a normalized baseline, then
 progresses all three sets for the next relevant workout:
 
 - each set receives at least **+1**;
@@ -1109,6 +1110,84 @@ L-Sit
 This supersedes the previous equal-target, +1-per-set progression and resolves
 the generic hold-time increment for normal rep- and hold-based prescriptions.
 
+### Normalize actual performance before applying progression
+
+After the athlete successfully completes a normal three-set prescription:
+
+1. add the actual results from all three sets;
+2. divide the total by 3;
+3. round down to the whole unit;
+4. use that value as an equal normalized baseline for all three sets; and
+5. apply the next rotating +2/+1/+1 increment to produce the next relevant
+   workout's prescription.
+
+For rep-based movements, the unit is repetitions. For hold-based movements,
+the unit is seconds.
+
+For example, actual rep performance of `7 / 6 / 6` produces:
+
+```text
+(7 + 6 + 6) / 3
+= 6.33
+→ round down to 6
+→ normalized baseline: 6 / 6 / 6
+```
+
+If Set 2 is next in the rotation, the next prescription is:
+
+```text
+7 / 8 / 7 reps
+```
+
+Significant overperformance uses the same rule. For example:
+
+```text
+Actual:
+10 / 7 / 6 reps
+
+(10 + 7 + 6) / 3
+= 7.67
+→ round down to 7
+→ normalized baseline: 7 / 7 / 7
+
+Next workout, if Set 1 receives the rotating extra increment:
+9 / 8 / 8 reps
+```
+
+Do not apply +2/+1/+1 independently to `10 / 7 / 6`. Normalization prevents
+an unusually strong or weak individual set from creating increasingly
+distorted prescriptions.
+
+The same calculation applies to hold seconds:
+
+```text
+Actual L-Sit holds:
+9 / 7 / 6 seconds
+
+22 / 3
+= 7.33
+→ round down to 7 seconds
+→ normalized baseline: 7 / 7 / 7 seconds
+
+Next workout, if Set 3 receives the rotating extra increment:
+8 / 8 / 9 seconds
+```
+
+Normalization does not reset the rotation. The set receiving the extra +1
+continues to rotate across successful workouts regardless of the normalized
+baseline.
+
+Conceptually:
+
+```text
+Actual full-workout performance
+→ average all three sets
+→ round down
+→ equal normalized baseline
+→ apply the next rotating +2/+1/+1
+→ next prescription
+```
+
 ## 12.6 Incomplete workouts repeat before regression
 
 One unsuccessful session should not immediately regress the athlete. If the
@@ -1126,11 +1205,15 @@ Next workout:
 7 / 6 / 6 again
 ```
 
+Do not normalize a failed result downward or automatically regress the
+prescription.
+
 Already-earned mastery is never removed by an incomplete workout.
 
-## 12.7 Performance above target is useful evidence
+## 12.7 Actual performance drives adaptation without erasing history
 
-The athlete should record actual performance even when it exceeds the target:
+The prescribed target is the minimum training goal. The athlete should record
+actual performance even when it exceeds that target:
 
 ```text
 Target:
@@ -1140,10 +1223,15 @@ Actual:
 10 / 9 / 8
 ```
 
-Significant overperformance is evidence that working capacity may be higher
-than the current prescription. A future adaptive system may progress faster
-than the normal rotating +2/+1/+1 path, but the formula for deciding when and
-by how much remains explicitly undecided.
+Full-workout performance is evidence of repeatable working capacity. The
+normalization rule in section 12.5 lets stronger actual performance raise the
+next baseline without requiring a separate percentage threshold,
+small/moderate/large classification, or accelerated-progression bonus.
+
+Normalization affects only the next prescription. It does not replace or erase
+the recorded set results. In this example, the athlete's 10-rep first set
+remains part of workout history and may remain personal-best evidence where
+appropriate.
 
 ## 12.8 Personal bests motivate; they do not prescribe
 
@@ -1202,7 +1290,6 @@ skill sequences.
 
 Do not yet implement or finalize:
 
-- accelerated progression formulas for significant overperformance;
 - detailed technique/attempt prescriptions;
 - workout-combination logic across multiple active skills;
 - exact rest periods;
