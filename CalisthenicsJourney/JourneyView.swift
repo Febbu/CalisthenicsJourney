@@ -25,7 +25,10 @@ struct JourneyView: View {
                         ForEach(current.requirements) { requirement in
                             RequirementCard(
                                 requirement: requirement,
-                                confirmations: confirmationCount(for: requirement)
+                                evaluation: RequirementEvaluator.evaluate(
+                                    requirement,
+                                    against: sessions
+                                )
                             )
                         }
                     }
@@ -48,41 +51,15 @@ struct JourneyView: View {
         }
     }
 
-    private func confirmationCount(for requirement: LevelRequirement) -> Int {
-        let qualifyingSessions = sessions.filter { session in
-            session.exerciseLogs.contains { log in
-                guard log.exerciseID == requirement.exerciseID else { return false }
-
-                switch requirement.metric {
-                case .reps:
-                    guard let target = requirement.targetReps else { return false }
-                    return log.sets.contains { ($0.reps ?? 0) >= target }
-
-                case .seconds:
-                    guard let target = requirement.targetSeconds else { return false }
-                    return log.sets.contains { ($0.seconds ?? 0) >= target }
-
-                case .weightAndReps:
-                    guard let targetWeight = requirement.targetWeight,
-                          let targetReps = requirement.targetReps else { return false }
-                    return log.sets.contains {
-                        ($0.weight ?? 0) >= targetWeight && ($0.reps ?? 0) >= targetReps
-                    }
-                }
-            }
-        }
-
-        return min(qualifyingSessions.count, requirement.confirmationsNeeded)
-    }
 }
 
 private struct RequirementCard: View {
     let requirement: LevelRequirement
-    let confirmations: Int
+    let evaluation: RequirementEvaluation
 
     var body: some View {
         HStack(spacing: 14) {
-            Image(systemName: confirmations >= requirement.confirmationsNeeded
+            Image(systemName: evaluation.isMastered
                   ? "checkmark.circle.fill"
                   : "circle")
                 .font(.title2)
@@ -91,7 +68,7 @@ private struct RequirementCard: View {
                 Text(requirement.title)
                     .font(.headline)
 
-                Text("\(confirmations) / \(requirement.confirmationsNeeded) confirmed")
+                Text("\(evaluation.confirmedCount) / \(evaluation.confirmationsNeeded) confirmed")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
