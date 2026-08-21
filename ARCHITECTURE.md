@@ -5,15 +5,17 @@
 This document defines the intended software architecture for
 **CalisthenicsJourney**.
 
-It complements `AGENTS.md`.
+It complements `AGENTS.md` and `SKILLS.md`.
 
 -   `AGENTS.md` protects the **product mechanics and design
     philosophy**.
 -   `ARCHITECTURE.md` protects the **code structure and implementation
     boundaries**.
+-   `SKILLS.md` protects the **approved V1 skill catalog, mastery trees,
+    and training-content decisions**.
 
-Any coding agent or developer making structural changes should read both
-files first.
+Any coding agent or developer making structural changes should read all
+three files first.
 
 The goal is a codebase that is:
 
@@ -1430,7 +1432,8 @@ This is the primary reason the architecture must remain data-driven.
 
 Before adding visual polish:
 
-1.  Finalize initial skill/workout content with the project owner.
+1.  Finalize supporting exercise and workout content for the approved
+    mastery trees in `SKILLS.md` with the project owner.
 2.  Remove the dedicated Progress tab from primary navigation.
 3.  Preserve workout history as a secondary destination.
 4.  Refine models so Skills/Stages can explicitly reference

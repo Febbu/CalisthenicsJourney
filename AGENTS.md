@@ -7,6 +7,10 @@ architectural rules for **CalisthenicsJourney**. Any agent or developer
 working on this project must read it before making product or
 architectural changes.
 
+It complements `ARCHITECTURE.md`, which protects software architecture
+and implementation boundaries, and `SKILLS.md`, which is the canonical
+source for approved V1 skill content and mastery progression.
+
 **Do not silently redesign, remove, replace, or reinterpret the
 decisions documented here.** If an implementation appears to require
 changing one, explain the proposed change to the project owner and
@@ -121,12 +125,9 @@ may exist when it supports overall foundation or relevant skills.
 
 ## 6. Skill trees
 
-Each skill consists of progression stages/nodes. A conceptual Handstand
-tree could be:
-
-**Wrist/shoulder preparation → Wall Handstand → Wall Balance Drills →
-Freestanding Attempts → 5s Freestanding → 15s Freestanding → 30s
-Freestanding → Mastered**
+Each skill consists of progression stages/nodes. The approved V1 skill
+catalog and mastery trees are defined in `SKILLS.md`; do not substitute
+older conceptual examples for that canonical content.
 
 Exact stages are editable product content and must not be permanently
 encoded as application logic.
@@ -415,20 +416,22 @@ Current principles:
 Workout UX must remain fast because it is used between real sets. Avoid
 unnecessary dialogs and confirmation steps.
 
-## 21. Training content is NOT finalized
+## 21. Supporting training content is NOT finalized
 
-Architecture is becoming defined, but exact training content is still
-under discussion.
+The V1 skill catalog and mastery trees are approved in `SKILLS.md`, but
+the supporting training content beneath those trees is still under
+discussion.
 
 Do not assume these prototype seed choices are final:
 
--   exact Pull-up progression;
--   exact L-Sit progression;
--   exact Handstand progression;
+-   supporting exercises;
+-   training prescriptions;
+-   exact sets, reps, hold times, rest, and preparation details;
+-   workout-generation behavior.
 
-Before substantially expanding training content, discuss active skills,
-correct progression stages, exercises supporting each stage, measurable
-mastery conditions, and how those exercises form a balanced workout.
+Before substantially expanding supporting content, discuss exercises for
+each approved transition, their prescriptions, objective form standards,
+and how they form a balanced workout.
 
 **Prototype seed data is not approved training doctrine.**
 
@@ -521,9 +524,9 @@ The repository has an initial V1 Git checkpoint.
 The current prototype is a foundation, not the final information
 architecture.
 
-The next major design task is to finalize **skill-driven workout
-architecture and initial training content** before broad editing
-interfaces or visual polish.
+The next major design task is to finalize **supporting exercises and
+training prescriptions for the approved skill trees** before broad
+editing interfaces or visual polish.
 
 ## 26. Product test
 
