@@ -436,9 +436,22 @@ final class Requirement {
         set { evidenceKindRaw = newValue.rawValue }
     }
 
+    var canonicalEvidenceKind: RequirementEvidenceKind? {
+        guard let legacyMetric = RequirementMetric(rawValue: metricRaw) else { return nil }
+        guard let evidenceKindRaw else {
+            return RequirementEvidenceKind(metric: legacyMetric)
+        }
+        return RequirementEvidenceKind(rawValue: evidenceKindRaw)
+    }
+
     var side: PerformanceSide {
         get { sideRaw.flatMap(PerformanceSide.init(rawValue:)) ?? .notApplicable }
         set { sideRaw = newValue.rawValue }
+    }
+
+    var canonicalSide: PerformanceSide? {
+        guard let sideRaw else { return .notApplicable }
+        return PerformanceSide(rawValue: sideRaw)
     }
 
     var hasExactlyOneOwner: Bool {

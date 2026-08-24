@@ -104,10 +104,12 @@ final class RequirementMigrationTests: XCTestCase {
             title: "Source",
             exerciseID: exercise.id,
             variationID: variation.id,
-            metric: .reps,
-            evidenceKind: .reps,
+            metric: .weightAndReps,
+            evidenceKind: .weightAndReps,
             side: .right,
             targetReps: 10,
+            targetWeight: 25,
+            targetSeconds: 30,
             skillStage: sourceStage
         )
         let implied = Requirement(
@@ -121,6 +123,10 @@ final class RequirementMigrationTests: XCTestCase {
             skillStage: impliedStage
         )
         let implication = RequirementImplication(source: source, implies: implied)
+        let sourceID = source.id
+        let impliedID = implied.id
+        let implicationID = implication.id
+        let variationID = variation.id
         context.insert(exercise)
         context.insert(variation)
         context.insert(skill)
@@ -131,19 +137,87 @@ final class RequirementMigrationTests: XCTestCase {
         context.insert(implication)
         try context.save()
 
+        let verificationContext = ModelContext(container)
         let persistedRequirement = try XCTUnwrap(
-            context.fetch(FetchDescriptor<Requirement>()).first { $0.id == source.id }
+            verificationContext.fetch(FetchDescriptor<Requirement>()).first { $0.id == sourceID }
         )
         let persistedImplication = try XCTUnwrap(
-            context.fetch(FetchDescriptor<RequirementImplication>()).first
+            verificationContext.fetch(FetchDescriptor<RequirementImplication>()).first { $0.id == implicationID }
         )
-        XCTAssertEqual(persistedRequirement.variationID, variation.id)
-        XCTAssertEqual(persistedRequirement.evidenceKind, .reps)
+        XCTAssertEqual(persistedRequirement.id, sourceID)
+        XCTAssertEqual(persistedRequirement.variationID, variationID)
+        XCTAssertEqual(persistedRequirement.evidenceKind, .weightAndReps)
         XCTAssertEqual(persistedRequirement.side, .right)
-        XCTAssertEqual(persistedImplication.sourceRequirementID, source.id)
-        XCTAssertEqual(persistedImplication.impliedRequirementID, implied.id)
-        XCTAssertEqual(persistedImplication.sourceRequirement?.id, source.id)
-        XCTAssertEqual(persistedImplication.impliedRequirement?.id, implied.id)
+        XCTAssertEqual(persistedRequirement.targetReps, 10)
+        XCTAssertEqual(persistedRequirement.targetWeight, 25)
+        XCTAssertEqual(persistedRequirement.targetSeconds, 30)
+        XCTAssertEqual(persistedRequirement.skillStage?.id, sourceStage.id)
+        XCTAssertEqual(persistedImplication.sourceRequirementID, sourceID)
+        XCTAssertEqual(persistedImplication.impliedRequirementID, impliedID)
+        XCTAssertEqual(persistedImplication.sourceRequirement?.id, sourceID)
+        XCTAssertEqual(persistedImplication.impliedRequirement?.id, impliedID)
+    }
+
+    func testPersistedEvidenceDeletionReevaluatesMasteryFromFreshHistory() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        let exercise = Exercise(name: "Movement", metric: .reps)
+        let variation = ExerciseVariation(name: "Exact variation", metric: .reps, exercise: exercise)
+        let stage = SkillStage(name: "Stage", orderIndex: 0)
+        let requirement = Requirement(
+            title: "Five reps",
+            exerciseID: exercise.id,
+            variationID: variation.id,
+            metric: .reps,
+            evidenceKind: .reps,
+            targetReps: 5,
+            skillStage: stage
+        )
+        let firstSession = WorkoutSession(workoutName: "First")
+        let firstLog = ExerciseLog(exercise: exercise, variation: variation, orderIndex: 0, session: firstSession)
+        let firstSet = SetLog(setNumber: 1, reps: 5, variation: variation, exerciseLog: firstLog)
+        let secondSession = WorkoutSession(workoutName: "Second")
+        let secondLog = ExerciseLog(exercise: exercise, variation: variation, orderIndex: 0, session: secondSession)
+        let secondSet = SetLog(setNumber: 1, reps: 6, variation: variation, exerciseLog: secondLog)
+        context.insert(exercise)
+        context.insert(variation)
+        context.insert(stage)
+        context.insert(requirement)
+        context.insert(firstSession)
+        context.insert(firstLog)
+        context.insert(firstSet)
+        context.insert(secondSession)
+        context.insert(secondLog)
+        context.insert(secondSet)
+        stage.requirements = [requirement]
+        firstSession.exerciseLogs = [firstLog]
+        firstLog.sets = [firstSet]
+        secondSession.exerciseLogs = [secondLog]
+        secondLog.sets = [secondSet]
+        try context.save()
+
+        let deletionContext = ModelContext(container)
+        let persistedRequirement = try XCTUnwrap(deletionContext.fetch(FetchDescriptor<Requirement>()).first)
+        var persistedSessions = try deletionContext.fetch(FetchDescriptor<WorkoutSession>())
+        XCTAssertTrue(RequirementEvaluator.evaluate(persistedRequirement, against: persistedSessions).isSatisfied)
+
+        let persistedSets = try deletionContext.fetch(FetchDescriptor<SetLog>()).sorted { $0.reps ?? 0 < $1.reps ?? 0 }
+        deletionContext.delete(try XCTUnwrap(persistedSets.first))
+        try deletionContext.save()
+
+        let oneProofContext = ModelContext(container)
+        let oneProofRequirement = try XCTUnwrap(oneProofContext.fetch(FetchDescriptor<Requirement>()).first)
+        persistedSessions = try oneProofContext.fetch(FetchDescriptor<WorkoutSession>())
+        XCTAssertTrue(RequirementEvaluator.evaluate(oneProofRequirement, against: persistedSessions).isSatisfied)
+
+        let lastProof = try XCTUnwrap(oneProofContext.fetch(FetchDescriptor<SetLog>()).first)
+        oneProofContext.delete(lastProof)
+        try oneProofContext.save()
+
+        let noProofContext = ModelContext(container)
+        let noProofRequirement = try XCTUnwrap(noProofContext.fetch(FetchDescriptor<Requirement>()).first)
+        let noProofSessions = try noProofContext.fetch(FetchDescriptor<WorkoutSession>())
+        XCTAssertFalse(RequirementEvaluator.evaluate(noProofRequirement, against: noProofSessions).isSatisfied)
     }
 
     func testFreshInstallSeedsOnlyGenericRequirements() throws {

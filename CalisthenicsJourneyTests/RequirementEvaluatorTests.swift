@@ -48,6 +48,46 @@ final class RequirementEvaluatorTests: XCTestCase {
         XCTAssertTrue(RequirementEvaluator.evaluate(requirement, against: [session(movement.variation, reps: 5)]).isSatisfied)
     }
 
+    func testMalformedRequirementSemanticsFailClosedWhileNilLegacyKindRemainsCompatible() {
+        let movement = fixture(metric: .reps)
+        let owner = JourneyLevel(number: 1, name: "Owner")
+        let proof = [session(movement.variation, reps: 5)]
+
+        let legacy = requirement(variation: movement.variation, kind: .reps, targetReps: 5, owner: owner)
+        legacy.evidenceKindRaw = nil
+        XCTAssertTrue(RequirementEvaluator.evaluate(legacy, against: proof).isSatisfied)
+
+        let invalidKind = requirement(variation: movement.variation, kind: .reps, targetReps: 5, owner: owner)
+        invalidKind.evidenceKindRaw = "futureUnknownKind"
+        XCTAssertFalse(RequirementEvaluator.evaluate(invalidKind, against: proof).isSatisfied)
+
+        let invalidSide = requirement(variation: movement.variation, kind: .reps, targetReps: 5, owner: owner)
+        invalidSide.sideRaw = "eitherSide"
+        XCTAssertFalse(RequirementEvaluator.evaluate(invalidSide, against: proof).isSatisfied)
+
+        let invalidMetric = requirement(variation: movement.variation, kind: .reps, targetReps: 5, owner: owner)
+        invalidMetric.metricRaw = "futureUnknownMetric"
+        XCTAssertFalse(RequirementEvaluator.evaluate(invalidMetric, against: proof).isSatisfied)
+    }
+
+    func testWeightAndRepsRequiresBothValuesAndBothThresholds() {
+        let movement = fixture(metric: .weightAndReps)
+        let owner = JourneyLevel(number: 1, name: "Owner")
+        let requirement = requirement(
+            variation: movement.variation,
+            kind: .weightAndReps,
+            targetReps: 5,
+            targetWeight: 20,
+            owner: owner
+        )
+
+        XCTAssertFalse(RequirementEvaluator.evaluate(requirement, against: [session(movement.variation, weight: 20, reps: 4)]).isSatisfied)
+        XCTAssertFalse(RequirementEvaluator.evaluate(requirement, against: [session(movement.variation, weight: 19, reps: 5)]).isSatisfied)
+        XCTAssertFalse(RequirementEvaluator.evaluate(requirement, against: [session(movement.variation, reps: 5)]).isSatisfied)
+        XCTAssertFalse(RequirementEvaluator.evaluate(requirement, against: [session(movement.variation, weight: 20)]).isSatisfied)
+        XCTAssertTrue(RequirementEvaluator.evaluate(requirement, against: [session(movement.variation, weight: 20, reps: 5)]).isSatisfied)
+    }
+
     func testExactVariationAndSideMustMatch() {
         let family = Exercise(name: "Family", metric: .reps)
         let first = ExerciseVariation(name: "First", metric: .reps, exercise: family)
@@ -108,6 +148,115 @@ final class RequirementEvaluatorTests: XCTestCase {
 
         XCTAssertTrue(RequirementEvaluator.evaluate(source, against: history, implications: [edge]).isSatisfied)
         XCTAssertTrue(RequirementEvaluator.evaluate(target, against: history, implications: [edge]).isSatisfied)
+    }
+
+    func testDirectImplicationAcrossDifferentVariations() throws {
+        let sourceMovement = fixture(metric: .reps)
+        let targetMovement = fixture(metric: .reps)
+        let sourceStage = SkillStage(name: "Source", orderIndex: 0)
+        let targetStage = SkillStage(name: "Target", orderIndex: 1)
+        let source = requirement(variation: sourceMovement.variation, kind: .reps, targetReps: 5, owner: sourceStage)
+        let target = requirement(variation: targetMovement.variation, kind: .reps, targetReps: 1, owner: targetStage)
+        let history = [session(sourceMovement.variation, reps: 5)]
+        let proofID = try XCTUnwrap(history[0].exerciseLogs.first?.sets.first?.id)
+
+        XCTAssertFalse(RequirementEvaluator.evaluate(target, against: history).isSatisfied)
+        let result = RequirementEvaluator.evaluate(
+            target,
+            against: history,
+            implications: [RequirementImplication(source: source, implies: target)]
+        )
+        XCTAssertTrue(result.isSatisfied)
+        XCTAssertTrue(result.directEvidenceIDs.isEmpty)
+        XCTAssertEqual(result.impliedEvidenceIDs, [proofID])
+        XCTAssertEqual(result.impliedByRequirementIDs, [source.id])
+    }
+
+    func testTransitiveImplicationPreservesOriginalEvidenceAndImmediateSources() throws {
+        let aMovement = fixture(metric: .reps)
+        let bMovement = fixture(metric: .reps)
+        let cMovement = fixture(metric: .reps)
+        let owner = JourneyLevel(number: 1, name: "Owner")
+        let a = requirement(variation: aMovement.variation, kind: .reps, targetReps: 5, owner: owner)
+        let b = requirement(variation: bMovement.variation, kind: .reps, targetReps: 5, owner: owner)
+        let c = requirement(variation: cMovement.variation, kind: .reps, targetReps: 5, owner: owner)
+        let history = [session(aMovement.variation, reps: 5)]
+        let proofID = try XCTUnwrap(history[0].exerciseLogs.first?.sets.first?.id)
+        let edges = [RequirementImplication(source: a, implies: b), RequirementImplication(source: b, implies: c)]
+
+        let bResult = RequirementEvaluator.evaluate(b, against: history, implications: edges)
+        let cResult = RequirementEvaluator.evaluate(c, against: history, implications: edges)
+        XCTAssertEqual(bResult.impliedEvidenceIDs, [proofID])
+        XCTAssertEqual(bResult.impliedByRequirementIDs, [a.id])
+        XCTAssertEqual(cResult.impliedEvidenceIDs, [proofID])
+        XCTAssertEqual(cResult.impliedByRequirementIDs, [b.id])
+    }
+
+    func testImplicationCyclesDoNotFabricateMasteryOrRecurseForever() {
+        let aMovement = fixture(metric: .reps)
+        let bMovement = fixture(metric: .reps)
+        let cMovement = fixture(metric: .reps)
+        let owner = JourneyLevel(number: 1, name: "Owner")
+        let a = requirement(variation: aMovement.variation, kind: .reps, targetReps: 5, owner: owner)
+        let b = requirement(variation: bMovement.variation, kind: .reps, targetReps: 5, owner: owner)
+        let c = requirement(variation: cMovement.variation, kind: .reps, targetReps: 5, owner: owner)
+        let twoCycle = [RequirementImplication(source: a, implies: b), RequirementImplication(source: b, implies: a)]
+        let longCycle = twoCycle + [RequirementImplication(source: b, implies: c), RequirementImplication(source: c, implies: a)]
+
+        XCTAssertFalse(RequirementEvaluator.evaluate(a, against: [], implications: twoCycle).isSatisfied)
+        XCTAssertFalse(RequirementEvaluator.evaluate(b, against: [], implications: twoCycle).isSatisfied)
+        XCTAssertFalse(RequirementEvaluator.evaluate(a, against: [], implications: longCycle).isSatisfied)
+        XCTAssertTrue(RequirementEvaluator.evaluate(b, against: [session(aMovement.variation, reps: 5)], implications: twoCycle).isSatisfied)
+    }
+
+    func testDiamondAndDuplicateImplicationsDeduplicateEvidenceDeterministically() throws {
+        let movements = (0..<4).map { _ in fixture(metric: .reps) }
+        let owner = JourneyLevel(number: 1, name: "Owner")
+        let a = requirement(variation: movements[0].variation, kind: .reps, targetReps: 5, owner: owner)
+        let b = requirement(variation: movements[1].variation, kind: .reps, targetReps: 5, owner: owner)
+        let c = requirement(variation: movements[2].variation, kind: .reps, targetReps: 5, owner: owner)
+        let d = requirement(variation: movements[3].variation, kind: .reps, targetReps: 5, owner: owner)
+        let history = [session(movements[0].variation, reps: 5)]
+        let proofID = try XCTUnwrap(history[0].exerciseLogs.first?.sets.first?.id)
+        let edges = [
+            RequirementImplication(source: a, implies: b),
+            RequirementImplication(source: a, implies: b),
+            RequirementImplication(source: a, implies: c),
+            RequirementImplication(source: b, implies: d),
+            RequirementImplication(source: c, implies: d)
+        ]
+
+        let bResult = RequirementEvaluator.evaluate(b, against: history, implications: edges)
+        XCTAssertEqual(bResult.qualifyingEvidenceIDs, [proofID])
+        XCTAssertEqual(bResult.impliedByRequirementIDs, [a.id])
+
+        let firstDResult = RequirementEvaluator.evaluate(d, against: history, implications: edges)
+        let secondDResult = RequirementEvaluator.evaluate(d, against: history, implications: Array(edges.reversed()))
+        XCTAssertEqual(firstDResult.qualifyingEvidenceIDs, [proofID])
+        XCTAssertEqual(firstDResult.impliedByRequirementIDs, [b.id, c.id].sorted { $0.uuidString < $1.uuidString })
+        XCTAssertEqual(firstDResult, secondDResult)
+    }
+
+    func testDirectAndImpliedRoutesAreReportedSeparatelyAndUnionIsDeduplicated() throws {
+        let sourceMovement = fixture(metric: .reps)
+        let targetMovement = fixture(metric: .reps)
+        let owner = JourneyLevel(number: 1, name: "Owner")
+        let source = requirement(variation: sourceMovement.variation, kind: .reps, targetReps: 5, owner: owner)
+        let target = requirement(variation: targetMovement.variation, kind: .reps, targetReps: 5, owner: owner)
+        let sourceSession = session(sourceMovement.variation, reps: 5)
+        let targetSession = session(targetMovement.variation, reps: 5)
+        let sourceID = try XCTUnwrap(sourceSession.exerciseLogs.first?.sets.first?.id)
+        let targetID = try XCTUnwrap(targetSession.exerciseLogs.first?.sets.first?.id)
+
+        let result = RequirementEvaluator.evaluate(
+            target,
+            against: [sourceSession, targetSession],
+            implications: [RequirementImplication(source: source, implies: target)]
+        )
+        XCTAssertEqual(result.directEvidenceIDs, [targetID])
+        XCTAssertEqual(result.impliedEvidenceIDs, [sourceID])
+        XCTAssertEqual(result.qualifyingEvidenceIDs, [sourceID, targetID].sorted { $0.uuidString < $1.uuidString })
+        XCTAssertEqual(result.impliedByRequirementIDs, [source.id])
     }
 
     func testEvidenceIsReusableAcrossOwnersAndUnaffectedByRenaming() {

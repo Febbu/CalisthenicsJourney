@@ -85,12 +85,14 @@ enum RequirementEvaluator {
         for requirement: Requirement,
         in sessions: [WorkoutSession]
     ) -> [SetLog] {
-        guard let requiredVariationID = requirement.variationID else { return [] }
+        guard let requiredVariationID = requirement.variationID,
+              let requiredSide = requirement.canonicalSide,
+              requirement.canonicalEvidenceKind != nil else { return [] }
 
         return sessions.flatMap(\.exerciseLogs).flatMap(\.sets).filter { set in
             guard set.hasActualPerformanceEvidence,
                   set.evidenceVariationID == requiredVariationID,
-                  set.side == requirement.side else { return false }
+                  set.side == requiredSide else { return false }
             return setQualifies(set, for: requirement)
         }
     }
@@ -99,7 +101,9 @@ enum RequirementEvaluator {
         _ set: SetLog,
         for requirement: Requirement
     ) -> Bool {
-        switch requirement.evidenceKind {
+        guard let evidenceKind = requirement.canonicalEvidenceKind else { return false }
+
+        switch evidenceKind {
         case .reps:
             guard set.effortKind == .numeric,
                   set.evidenceMetric == .reps,
