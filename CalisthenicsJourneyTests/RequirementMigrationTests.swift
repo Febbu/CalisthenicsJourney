@@ -92,6 +92,60 @@ final class RequirementMigrationTests: XCTestCase {
         XCTAssertNotNil(stageRequirement.skillStage)
     }
 
+    func testCanonicalRequirementAndImplicationRoundTrip() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        let exercise = Exercise(name: "Movement", metric: .reps)
+        let variation = ExerciseVariation(name: "Exact variation", metric: .reps, exercise: exercise)
+        let skill = Skill(name: "Skill", emoji: "")
+        let sourceStage = SkillStage(name: "Source", orderIndex: 1, skill: skill)
+        let impliedStage = SkillStage(name: "Implied", orderIndex: 0, skill: skill)
+        let source = Requirement(
+            title: "Source",
+            exerciseID: exercise.id,
+            variationID: variation.id,
+            metric: .reps,
+            evidenceKind: .reps,
+            side: .right,
+            targetReps: 10,
+            skillStage: sourceStage
+        )
+        let implied = Requirement(
+            title: "Implied",
+            exerciseID: exercise.id,
+            variationID: variation.id,
+            metric: .reps,
+            evidenceKind: .reps,
+            side: .right,
+            targetReps: 5,
+            skillStage: impliedStage
+        )
+        let implication = RequirementImplication(source: source, implies: implied)
+        context.insert(exercise)
+        context.insert(variation)
+        context.insert(skill)
+        context.insert(sourceStage)
+        context.insert(impliedStage)
+        context.insert(source)
+        context.insert(implied)
+        context.insert(implication)
+        try context.save()
+
+        let persistedRequirement = try XCTUnwrap(
+            context.fetch(FetchDescriptor<Requirement>()).first { $0.id == source.id }
+        )
+        let persistedImplication = try XCTUnwrap(
+            context.fetch(FetchDescriptor<RequirementImplication>()).first
+        )
+        XCTAssertEqual(persistedRequirement.variationID, variation.id)
+        XCTAssertEqual(persistedRequirement.evidenceKind, .reps)
+        XCTAssertEqual(persistedRequirement.side, .right)
+        XCTAssertEqual(persistedImplication.sourceRequirementID, source.id)
+        XCTAssertEqual(persistedImplication.impliedRequirementID, implied.id)
+        XCTAssertEqual(persistedImplication.sourceRequirement?.id, source.id)
+        XCTAssertEqual(persistedImplication.impliedRequirement?.id, implied.id)
+    }
+
     func testFreshInstallSeedsOnlyGenericRequirements() throws {
         let container = try makeContainer()
         let context = container.mainContext
@@ -121,6 +175,7 @@ final class RequirementMigrationTests: XCTestCase {
             JourneyLevel.self,
             LevelRequirement.self,
             Requirement.self,
+            RequirementImplication.self,
             Skill.self,
             SkillStage.self,
             configurations: configuration

@@ -422,6 +422,7 @@ final class EvidenceFoundationTests: XCTestCase {
             JourneyLevel.self,
             LevelRequirement.self,
             Requirement.self,
+            RequirementImplication.self,
             Skill.self,
             SkillStage.self,
             configurations: configuration

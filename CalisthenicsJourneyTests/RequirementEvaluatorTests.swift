@@ -3,195 +3,205 @@ import XCTest
 
 @MainActor
 final class RequirementEvaluatorTests: XCTestCase {
-    func testRepsThresholdUsesActualLoggedValue() {
-        let exercise = Exercise(name: "Editable name", metric: .reps)
-        let requirement = makeRequirement(exercise: exercise, metric: .reps, targetReps: 20)
-        let sessions = [19, 20, 21].map { session(exercise: exercise, reps: $0) }
-
-        let evaluation = RequirementEvaluator.evaluate(requirement, against: sessions)
-
-        XCTAssertEqual(evaluation.qualifyingSessionCount, 2)
-        XCTAssertTrue(evaluation.isMastered)
-    }
-
-    func testSecondsThresholdUsesActualLoggedValue() {
-        let exercise = Exercise(name: "Timed hold", metric: .seconds)
-        let requirement = makeRequirement(exercise: exercise, metric: .seconds, targetSeconds: 30)
-        let sessions = [29, 30].map { session(exercise: exercise, seconds: $0) }
-
-        let evaluation = RequirementEvaluator.evaluate(requirement, against: sessions)
-
-        XCTAssertEqual(evaluation.qualifyingSessionCount, 1)
-        XCTAssertFalse(evaluation.isMastered)
-    }
-
-    func testWeightAndRepsMustBothReachTheirTargets() {
-        let exercise = Exercise(name: "Weighted movement", metric: .weightAndReps)
-        let requirement = makeRequirement(
-            exercise: exercise,
-            metric: .weightAndReps,
-            targetReps: 10,
-            targetWeight: 100
-        )
+    func testOneNumericDemonstrationSatisfiesEachMetricDespiteLegacyConfirmationCount() {
+        let reps = fixture(metric: .reps)
+        let seconds = fixture(metric: .seconds)
+        let weighted = fixture(metric: .weightAndReps)
+        let owner = JourneyLevel(number: 1, name: "Legacy")
+        let requirements = [
+            requirement(variation: reps.variation, kind: .reps, targetReps: 5, confirmationsNeeded: 99, owner: owner),
+            requirement(variation: seconds.variation, kind: .seconds, targetSeconds: 10, confirmationsNeeded: 2, owner: owner),
+            requirement(variation: weighted.variation, kind: .weightAndReps, targetReps: 5, targetWeight: 20, owner: owner)
+        ]
         let sessions = [
-            session(exercise: exercise, weight: 99, reps: 10),
-            session(exercise: exercise, weight: 100, reps: 9),
-            session(exercise: exercise, weight: 100, reps: 10)
+            session(reps.variation, reps: 5),
+            session(seconds.variation, seconds: 10),
+            session(weighted.variation, weight: 20, reps: 5)
         ]
 
-        let evaluation = RequirementEvaluator.evaluate(requirement, against: sessions)
-
-        XCTAssertEqual(evaluation.qualifyingSessionCount, 1)
+        for requirement in requirements {
+            let result = RequirementEvaluator.evaluate(requirement, against: sessions)
+            XCTAssertTrue(result.isSatisfied)
+            XCTAssertEqual(result.qualifyingEvidenceIDs.count, 1)
+        }
+        XCTAssertEqual(requirements[0].confirmationsNeeded, 99)
     }
 
-    func testEmptyPlannedSetDoesNotCount() {
-        let exercise = Exercise(name: "Movement", metric: .reps)
-        let requirement = makeRequirement(exercise: exercise, metric: .reps, targetReps: 1)
+    func testAttemptRequirementRequiresSuccessfulAttempt() {
+        let movement = fixture(metric: .reps)
+        let owner = JourneyLevel(number: 1, name: "Owner")
+        let requirement = requirement(variation: movement.variation, kind: .successfulAttempt, owner: owner)
 
-        let evaluation = RequirementEvaluator.evaluate(
-            requirement,
-            against: [session(exercise: exercise)]
-        )
-
-        XCTAssertEqual(evaluation.qualifyingSessionCount, 0)
+        XCTAssertFalse(RequirementEvaluator.evaluate(requirement, against: [session(movement.variation, effortKind: .attempt)]).isSatisfied)
+        XCTAssertFalse(RequirementEvaluator.evaluate(requirement, against: [session(movement.variation, reps: 20, effortKind: .attempt)]).isSatisfied)
+        XCTAssertFalse(RequirementEvaluator.evaluate(requirement, against: [session(movement.variation, effortKind: .attempt, attemptOutcome: .unsuccessful)]).isSatisfied)
+        XCTAssertTrue(RequirementEvaluator.evaluate(requirement, against: [session(movement.variation, effortKind: .attempt, attemptOutcome: .successful)]).isSatisfied)
     }
 
-    func testQualifyingSetInUnfinishedWorkoutCounts() {
-        let exercise = Exercise(name: "Movement", metric: .reps)
-        let requirement = makeRequirement(exercise: exercise, metric: .reps, targetReps: 10)
-        let unfinishedSession = session(exercise: exercise, reps: 10, isCompleted: false)
+    func testNumericRequirementIgnoresAttemptOutcomeAndMalformedMetrics() {
+        let movement = fixture(metric: .reps)
+        let owner = JourneyLevel(number: 1, name: "Owner")
+        let requirement = requirement(variation: movement.variation, kind: .reps, targetReps: 5, owner: owner)
 
-        let evaluation = RequirementEvaluator.evaluate(
-            requirement,
-            against: [unfinishedSession]
-        )
-
-        XCTAssertNil(unfinishedSession.completedAt)
-        XCTAssertEqual(evaluation.qualifyingSessionCount, 1)
+        XCTAssertFalse(RequirementEvaluator.evaluate(requirement, against: [session(movement.variation, effortKind: .numeric, attemptOutcome: .successful)]).isSatisfied)
+        XCTAssertFalse(RequirementEvaluator.evaluate(requirement, against: [session(movement.variation, seconds: 10, metric: .seconds)]).isSatisfied)
+        XCTAssertTrue(RequirementEvaluator.evaluate(requirement, against: [session(movement.variation, reps: 5)]).isSatisfied)
     }
 
-    func testMultipleQualifyingSetsInOneSessionCountOnce() {
-        let exercise = Exercise(name: "Movement", metric: .reps)
-        let requirement = makeRequirement(exercise: exercise, metric: .reps, targetReps: 10)
-        let workout = session(exercise: exercise, reps: 10)
-        let log = workout.exerciseLogs[0]
-        log.sets.append(SetLog(setNumber: 2, reps: 12, exerciseLog: log))
+    func testExactVariationAndSideMustMatch() {
+        let family = Exercise(name: "Family", metric: .reps)
+        let first = ExerciseVariation(name: "First", metric: .reps, exercise: family)
+        let second = ExerciseVariation(name: "Second", metric: .reps, exercise: family)
+        let owner = JourneyLevel(number: 1, name: "Owner")
+        let left = requirement(variation: first, kind: .reps, targetReps: 5, side: .left, owner: owner)
+        let right = requirement(variation: first, kind: .reps, targetReps: 5, side: .right, owner: owner)
+        let general = requirement(variation: first, kind: .reps, targetReps: 5, owner: owner)
 
-        let evaluation = RequirementEvaluator.evaluate(requirement, against: [workout])
-
-        XCTAssertEqual(evaluation.qualifyingSessionCount, 1)
+        XCTAssertTrue(RequirementEvaluator.evaluate(left, against: [session(first, reps: 5, side: .left)]).isSatisfied)
+        XCTAssertFalse(RequirementEvaluator.evaluate(right, against: [session(first, reps: 5, side: .left)]).isSatisfied)
+        XCTAssertTrue(RequirementEvaluator.evaluate(right, against: [session(first, reps: 5, side: .right)]).isSatisfied)
+        XCTAssertTrue(RequirementEvaluator.evaluate(general, against: [session(first, reps: 5)]).isSatisfied)
+        XCTAssertFalse(RequirementEvaluator.evaluate(general, against: [session(second, reps: 50)]).isSatisfied)
     }
 
-    func testSeparateSessionsCountAndVisibleConfirmationIsCapped() {
-        let exercise = Exercise(name: "Movement", metric: .reps)
-        let requirement = makeRequirement(exercise: exercise, metric: .reps, targetReps: 10)
-        let sessions = (1...3).map { _ in session(exercise: exercise, reps: 10) }
+    func testSeparateLeftAndRightRequirementsCanMasterOneOwner() {
+        let movement = fixture(metric: .reps)
+        let stage = SkillStage(name: "Both sides", orderIndex: 0)
+        let left = requirement(variation: movement.variation, kind: .reps, targetReps: 3, side: .left, owner: stage)
+        let right = requirement(variation: movement.variation, kind: .reps, targetReps: 3, side: .right, owner: stage)
 
-        let evaluation = RequirementEvaluator.evaluate(requirement, against: sessions)
-
-        XCTAssertEqual(evaluation.qualifyingSessionCount, 3)
-        XCTAssertEqual(evaluation.confirmedCount, 2)
-        XCTAssertTrue(evaluation.isMastered)
+        XCTAssertTrue(RequirementEvaluator.areAllMastered(
+            [left, right],
+            against: [session(movement.variation, reps: 3, side: .left), session(movement.variation, reps: 3, side: .right)]
+        ))
     }
 
-    func testDifferentExerciseIdentityDoesNotCount() {
-        let requiredExercise = Exercise(name: "Same display name", metric: .reps)
-        let otherExercise = Exercise(name: "Same display name", metric: .reps)
-        let requirement = makeRequirement(
-            exercise: requiredExercise,
-            metric: .reps,
-            targetReps: 10
-        )
+    func testExplicitImplicationPropagatesEvidenceButOrderAndUnrelatedRequirementsDoNot() {
+        let movement = fixture(metric: .reps)
+        let firstStage = SkillStage(name: "Earlier", orderIndex: 0)
+        let laterStage = SkillStage(name: "Later", orderIndex: 5)
+        let unrelatedStage = SkillStage(name: "Independent", orderIndex: 1)
+        let lower = requirement(variation: movement.variation, kind: .reps, targetReps: 1, owner: firstStage)
+        let middle = requirement(variation: movement.variation, kind: .reps, targetReps: 5, owner: firstStage)
+        let higher = requirement(variation: movement.variation, kind: .reps, targetReps: 10, owner: laterStage)
+        let unrelated = requirement(variation: movement.variation, kind: .successfulAttempt, owner: unrelatedStage)
+        let implications = [RequirementImplication(source: higher, implies: middle), RequirementImplication(source: middle, implies: lower)]
+        let history = [session(movement.variation, reps: 10)]
 
-        let evaluation = RequirementEvaluator.evaluate(
-            requirement,
-            against: [session(exercise: otherExercise, reps: 20)]
-        )
-
-        XCTAssertEqual(evaluation.qualifyingSessionCount, 0)
+        let lowerResult = RequirementEvaluator.evaluate(lower, against: history, implications: implications)
+        XCTAssertTrue(lowerResult.isSatisfied)
+        XCTAssertEqual(lowerResult.qualifyingEvidenceIDs.count, 1)
+        XCTAssertEqual(lowerResult.impliedByRequirementIDs, [middle.id])
+        XCTAssertFalse(RequirementEvaluator.evaluate(unrelated, against: history, implications: implications).isSatisfied)
     }
 
-    func testAllRequirementsForOwnerMustBeMastered() {
-        let repsExercise = Exercise(name: "Reps", metric: .reps)
-        let holdExercise = Exercise(name: "Hold", metric: .seconds)
-        let level = JourneyLevel(number: 1, name: "Test Level")
-        let repsRequirement = Requirement(
-            title: "Reps requirement",
-            exerciseID: repsExercise.id,
-            metric: .reps,
-            targetReps: 10,
-            confirmationsNeeded: 1,
-            journeyLevel: level
-        )
-        let holdRequirement = Requirement(
-            title: "Hold requirement",
-            exerciseID: holdExercise.id,
-            metric: .seconds,
-            targetSeconds: 20,
-            confirmationsNeeded: 1,
-            journeyLevel: level
-        )
-        let repsSession = session(exercise: repsExercise, reps: 10)
+    func testExplicitImplicationAndEvidenceCanCrossSkillsAndOwners() {
+        let movement = fixture(metric: .seconds)
+        let firstSkill = Skill(name: "First", emoji: "")
+        let secondSkill = Skill(name: "Second", emoji: "")
+        let sourceStage = SkillStage(name: "Source", orderIndex: 0, skill: firstSkill)
+        let targetStage = SkillStage(name: "Target", orderIndex: 0, skill: secondSkill)
+        let source = requirement(variation: movement.variation, kind: .seconds, targetSeconds: 10, owner: sourceStage)
+        let target = requirement(variation: movement.variation, kind: .seconds, targetSeconds: 5, owner: targetStage)
+        let edge = RequirementImplication(source: source, implies: target)
+        let history = [session(movement.variation, seconds: 10)]
 
-        XCTAssertFalse(
-            RequirementEvaluator.areAllMastered(
-                [repsRequirement, holdRequirement],
-                against: [repsSession]
-            )
-        )
-
-        let holdSession = session(exercise: holdExercise, seconds: 20)
-        XCTAssertTrue(
-            RequirementEvaluator.areAllMastered(
-                [repsRequirement, holdRequirement],
-                against: [repsSession, holdSession]
-            )
-        )
+        XCTAssertTrue(RequirementEvaluator.evaluate(source, against: history, implications: [edge]).isSatisfied)
+        XCTAssertTrue(RequirementEvaluator.evaluate(target, against: history, implications: [edge]).isSatisfied)
     }
 
-    func testOwnerWithoutRequirementsIsNotAutomaticallyMastered() {
-        XCTAssertFalse(RequirementEvaluator.areAllMastered([], against: []))
+    func testEvidenceIsReusableAcrossOwnersAndUnaffectedByRenaming() {
+        let movement = fixture(metric: .reps)
+        let firstStage = SkillStage(name: "First owner", orderIndex: 0)
+        let secondStage = SkillStage(name: "Second owner", orderIndex: 0)
+        let first = requirement(variation: movement.variation, kind: .reps, targetReps: 5, owner: firstStage)
+        let second = requirement(variation: movement.variation, kind: .reps, targetReps: 5, owner: secondStage)
+        let history = [session(movement.variation, reps: 5)]
+
+        movement.exercise.name = "Renamed family"
+        movement.variation.name = "Renamed variation"
+
+        XCTAssertTrue(RequirementEvaluator.evaluate(first, against: history).isSatisfied)
+        XCTAssertTrue(RequirementEvaluator.evaluate(second, against: history).isSatisfied)
     }
 
-    private func makeRequirement(
-        exercise: Exercise,
-        metric: RequirementMetric,
+    func testReevaluationTracksEvidenceRemovalAndPreservesOtherProof() {
+        let movement = fixture(metric: .reps)
+        let owner = JourneyLevel(number: 1, name: "Owner")
+        let requirement = requirement(variation: movement.variation, kind: .reps, targetReps: 10, owner: owner)
+        let strong = session(movement.variation, reps: 10)
+        let otherStrong = session(movement.variation, reps: 12)
+        let weak = session(movement.variation, reps: 2)
+
+        XCTAssertTrue(RequirementEvaluator.evaluate(requirement, against: [strong, weak]).isSatisfied)
+        XCTAssertFalse(RequirementEvaluator.evaluate(requirement, against: [weak]).isSatisfied)
+        XCTAssertTrue(RequirementEvaluator.evaluate(requirement, against: [otherStrong, weak]).isSatisfied)
+    }
+
+    func testUnfinishedAndPartialEvidenceQualifiesWhileEmptyRowDoesNot() {
+        let movement = fixture(metric: .reps)
+        let owner = JourneyLevel(number: 1, name: "Owner")
+        let requirement = requirement(variation: movement.variation, kind: .reps, targetReps: 5, owner: owner)
+        let unfinished = session(movement.variation, reps: 5, completed: false)
+        let empty = session(movement.variation)
+
+        XCTAssertTrue(RequirementEvaluator.evaluate(requirement, against: [unfinished]).isSatisfied)
+        XCTAssertFalse(RequirementEvaluator.evaluate(requirement, against: [empty]).isSatisfied)
+    }
+
+    private func fixture(metric: ExerciseMetric) -> (exercise: Exercise, variation: ExerciseVariation) {
+        let exercise = Exercise(name: "Family", metric: metric)
+        return (exercise, ExerciseVariation(name: "Exact", metric: metric, exercise: exercise))
+    }
+
+    private func requirement(
+        variation: ExerciseVariation,
+        kind: RequirementEvidenceKind,
         targetReps: Int? = nil,
         targetWeight: Double? = nil,
-        targetSeconds: Int? = nil
+        targetSeconds: Int? = nil,
+        side: PerformanceSide = .notApplicable,
+        confirmationsNeeded: Int = 2,
+        owner: JourneyLevel
     ) -> Requirement {
-        Requirement(
-            title: "Editable requirement",
-            exerciseID: exercise.id,
-            metric: metric,
-            targetReps: targetReps,
-            targetWeight: targetWeight,
-            targetSeconds: targetSeconds,
-            confirmationsNeeded: 2,
-            journeyLevel: JourneyLevel(number: 1, name: "Test Level")
-        )
+        Requirement(title: "Requirement", exerciseID: variation.exercise?.id, variationID: variation.id, metric: legacyMetric(kind), evidenceKind: kind, side: side, targetReps: targetReps, targetWeight: targetWeight, targetSeconds: targetSeconds, confirmationsNeeded: confirmationsNeeded, journeyLevel: owner)
+    }
+
+    private func requirement(
+        variation: ExerciseVariation,
+        kind: RequirementEvidenceKind,
+        targetReps: Int? = nil,
+        targetWeight: Double? = nil,
+        targetSeconds: Int? = nil,
+        side: PerformanceSide = .notApplicable,
+        owner: SkillStage
+    ) -> Requirement {
+        Requirement(title: "Requirement", exerciseID: variation.exercise?.id, variationID: variation.id, metric: legacyMetric(kind), evidenceKind: kind, side: side, targetReps: targetReps, targetWeight: targetWeight, targetSeconds: targetSeconds, skillStage: owner)
+    }
+
+    private func legacyMetric(_ kind: RequirementEvidenceKind) -> RequirementMetric {
+        switch kind {
+        case .reps, .successfulAttempt: return .reps
+        case .seconds: return .seconds
+        case .weightAndReps: return .weightAndReps
+        }
     }
 
     private func session(
-        exercise: Exercise,
+        _ variation: ExerciseVariation,
         weight: Double? = nil,
         reps: Int? = nil,
         seconds: Int? = nil,
-        isCompleted: Bool = true
+        metric: ExerciseMetric? = nil,
+        side: PerformanceSide = .notApplicable,
+        effortKind: EffortKind = .numeric,
+        attemptOutcome: AttemptOutcome? = nil,
+        completed: Bool = true
     ) -> WorkoutSession {
-        let workout = WorkoutSession(workoutName: "Test Workout")
-        if isCompleted {
-            workout.completedAt = .now
-        }
-
-        let log = ExerciseLog(exercise: exercise, orderIndex: 0, session: workout)
-        let set = SetLog(
-            setNumber: 1,
-            weight: weight,
-            reps: reps,
-            seconds: seconds,
-            exerciseLog: log
-        )
+        let workout = WorkoutSession(workoutName: "Workout")
+        if completed { workout.completedAt = .now }
+        let log = ExerciseLog(exercise: variation.exercise!, variation: variation, orderIndex: 0, session: workout)
+        let set = SetLog(setNumber: 1, weight: weight, reps: reps, seconds: seconds, metric: metric, side: side, effortKind: effortKind, attemptOutcome: attemptOutcome, variation: variation, exerciseLog: log)
         log.sets = [set]
         workout.exerciseLogs = [log]
         return workout

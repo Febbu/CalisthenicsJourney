@@ -18,6 +18,7 @@ struct CalisthenicsJourneyApp: App {
             JourneyLevel.self,
             LevelRequirement.self,
             Requirement.self,
+            RequirementImplication.self,
             Skill.self,
             SkillStage.self
         ])

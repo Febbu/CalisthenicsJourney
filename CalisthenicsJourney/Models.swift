@@ -351,6 +351,21 @@ enum RequirementMetric: String, Codable, CaseIterable {
     case weightAndReps
 }
 
+enum RequirementEvidenceKind: String, Codable, CaseIterable {
+    case reps
+    case seconds
+    case weightAndReps
+    case successfulAttempt
+
+    init(metric: RequirementMetric) {
+        switch metric {
+        case .reps: self = .reps
+        case .seconds: self = .seconds
+        case .weightAndReps: self = .weightAndReps
+        }
+    }
+}
+
 @Model
 final class LevelRequirement {
     @Attribute(.unique) var id: UUID
@@ -395,7 +410,10 @@ final class Requirement {
     @Attribute(.unique) var id: UUID
     var title: String
     var exerciseID: UUID?
+    var variationID: UUID?
     var metricRaw: String
+    var evidenceKindRaw: String?
+    var sideRaw: String?
     var targetReps: Int?
     var targetWeight: Double?
     var targetSeconds: Int?
@@ -410,6 +428,19 @@ final class Requirement {
         set { metricRaw = newValue.rawValue }
     }
 
+    var evidenceKind: RequirementEvidenceKind {
+        get {
+            evidenceKindRaw.flatMap(RequirementEvidenceKind.init(rawValue:))
+                ?? RequirementEvidenceKind(metric: metric)
+        }
+        set { evidenceKindRaw = newValue.rawValue }
+    }
+
+    var side: PerformanceSide {
+        get { sideRaw.flatMap(PerformanceSide.init(rawValue:)) ?? .notApplicable }
+        set { sideRaw = newValue.rawValue }
+    }
+
     var hasExactlyOneOwner: Bool {
         (journeyLevel != nil) != (skillStage != nil)
     }
@@ -418,7 +449,10 @@ final class Requirement {
         id: UUID = UUID(),
         title: String,
         exerciseID: UUID? = nil,
+        variationID: UUID? = nil,
         metric: RequirementMetric,
+        evidenceKind: RequirementEvidenceKind? = nil,
+        side: PerformanceSide = .notApplicable,
         targetReps: Int? = nil,
         targetWeight: Double? = nil,
         targetSeconds: Int? = nil,
@@ -428,7 +462,10 @@ final class Requirement {
         self.id = id
         self.title = title
         self.exerciseID = exerciseID
+        self.variationID = variationID
         self.metricRaw = metric.rawValue
+        self.evidenceKindRaw = (evidenceKind ?? RequirementEvidenceKind(metric: metric)).rawValue
+        self.sideRaw = side.rawValue
         self.targetReps = targetReps
         self.targetWeight = targetWeight
         self.targetSeconds = targetSeconds
@@ -442,7 +479,10 @@ final class Requirement {
         id: UUID = UUID(),
         title: String,
         exerciseID: UUID? = nil,
+        variationID: UUID? = nil,
         metric: RequirementMetric,
+        evidenceKind: RequirementEvidenceKind? = nil,
+        side: PerformanceSide = .notApplicable,
         targetReps: Int? = nil,
         targetWeight: Double? = nil,
         targetSeconds: Int? = nil,
@@ -452,7 +492,10 @@ final class Requirement {
         self.id = id
         self.title = title
         self.exerciseID = exerciseID
+        self.variationID = variationID
         self.metricRaw = metric.rawValue
+        self.evidenceKindRaw = (evidenceKind ?? RequirementEvidenceKind(metric: metric)).rawValue
+        self.sideRaw = side.rawValue
         self.targetReps = targetReps
         self.targetWeight = targetWeight
         self.targetSeconds = targetSeconds
@@ -460,6 +503,25 @@ final class Requirement {
         self.createdAt = .now
         self.updatedAt = .now
         self.skillStage = skillStage
+    }
+}
+
+@Model
+final class RequirementImplication {
+    @Attribute(.unique) var id: UUID
+    var sourceRequirementID: UUID
+    var impliedRequirementID: UUID
+    var createdAt: Date
+    var sourceRequirement: Requirement?
+    var impliedRequirement: Requirement?
+
+    init(source: Requirement, implies implied: Requirement) {
+        self.id = UUID()
+        self.sourceRequirementID = source.id
+        self.impliedRequirementID = implied.id
+        self.createdAt = .now
+        self.sourceRequirement = source
+        self.impliedRequirement = implied
     }
 }
 

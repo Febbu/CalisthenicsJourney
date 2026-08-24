@@ -3,198 +3,141 @@ import XCTest
 
 @MainActor
 final class ProgressionEngineTests: XCTestCase {
-    func testStageIsNotMasteredWhenOneRequirementIsMissing() {
-        let stage = makeStage()
-        let repsExercise = Exercise(name: "Reps", metric: .reps)
-        let holdExercise = Exercise(name: "Hold", metric: .seconds)
+    func testStageRequiresAllExplicitRequirementsIncludingBothSides() {
+        let skill = Skill(name: "Skill", emoji: "")
+        let stage = SkillStage(name: "Stage", orderIndex: 0, skill: skill)
+        let movement = fixture(metric: .reps)
         stage.requirements = [
-            requirement(exercise: repsExercise, targetReps: 10, stage: stage),
-            requirement(exercise: holdExercise, targetSeconds: 20, stage: stage)
+            requirement(movement.variation, target: 3, side: .left, stage: stage),
+            requirement(movement.variation, target: 3, side: .right, stage: stage)
         ]
 
-        XCTAssertFalse(
-            ProgressionEngine.isMastered(
-                stage,
-                against: [session(exercise: repsExercise, reps: 10)]
-            )
-        )
-    }
-
-    func testStageIsMasteredWhenAllRequirementsPass() {
-        let stage = makeStage()
-        let repsExercise = Exercise(name: "Reps", metric: .reps)
-        let holdExercise = Exercise(name: "Hold", metric: .seconds)
-        stage.requirements = [
-            requirement(exercise: repsExercise, targetReps: 10, stage: stage),
-            requirement(exercise: holdExercise, targetSeconds: 20, stage: stage)
-        ]
-
-        let sessions = [
-            session(exercise: repsExercise, reps: 10),
-            session(exercise: holdExercise, seconds: 20)
-        ]
-
-        XCTAssertTrue(ProgressionEngine.isMastered(stage, against: sessions))
+        XCTAssertFalse(ProgressionEngine.isMastered(stage, against: [session(movement.variation, reps: 3, side: .left)]))
+        XCTAssertTrue(ProgressionEngine.isMastered(stage, against: [session(movement.variation, reps: 3, side: .left), session(movement.variation, reps: 3, side: .right)]))
     }
 
     func testOwnerWithNoRequirementsIsNotMastered() {
-        XCTAssertFalse(ProgressionEngine.isMastered(makeStage(), against: []))
-
-        let level = JourneyLevel(number: 1, name: "Empty Level")
-        XCTAssertFalse(ProgressionEngine.isMastered(level, against: []))
+        XCTAssertFalse(ProgressionEngine.isMastered(SkillStage(name: "Empty", orderIndex: 0), against: []))
+        XCTAssertFalse(ProgressionEngine.isMastered(JourneyLevel(number: 1, name: "Legacy"), against: []))
     }
 
-    func testOrderedStagesProduceCompletedCurrentAndFutureStates() {
-        let skill = Skill(name: "Editable skill", emoji: "")
-        let first = makeStage(name: "First", orderIndex: 0, skill: skill)
-        let second = makeStage(name: "Second", orderIndex: 1, skill: skill)
-        let third = makeStage(name: "Third", orderIndex: 2, skill: skill)
+    func testOrderedStateIsDerivedFromEvidenceNotStoredFlags() {
+        let skill = Skill(name: "Skill", emoji: "")
+        let first = SkillStage(name: "First", orderIndex: 0, isCurrent: true, isCompleted: false, skill: skill)
+        let second = SkillStage(name: "Second", orderIndex: 1, isCurrent: false, isCompleted: true, skill: skill)
+        let third = SkillStage(name: "Third", orderIndex: 2, isCurrent: true, isCompleted: true, skill: skill)
         skill.stages = [third, first, second]
-
-        let firstExercise = Exercise(name: "First exercise", metric: .reps)
-        let secondExercise = Exercise(name: "Second exercise", metric: .reps)
-        let thirdExercise = Exercise(name: "Third exercise", metric: .reps)
-        first.requirements = [requirement(exercise: firstExercise, targetReps: 5, stage: first)]
-        second.requirements = [requirement(exercise: secondExercise, targetReps: 5, stage: second)]
-        third.requirements = [requirement(exercise: thirdExercise, targetReps: 5, stage: third)]
+        let firstMovement = fixture(metric: .reps)
+        let secondMovement = fixture(metric: .reps)
+        let thirdMovement = fixture(metric: .reps)
+        first.requirements = [requirement(firstMovement.variation, target: 5, stage: first)]
+        second.requirements = [requirement(secondMovement.variation, target: 5, stage: second)]
+        third.requirements = [requirement(thirdMovement.variation, target: 5, stage: third)]
 
         let states = ProgressionEngine.orderedStageStates(
             for: skill,
-            against: [
-                session(exercise: firstExercise, reps: 5),
-                session(exercise: thirdExercise, reps: 5)
-            ]
+            against: [session(firstMovement.variation, reps: 5), session(thirdMovement.variation, reps: 5)]
         )
 
-        XCTAssertEqual(
-            states,
-            [
-                SkillStageProgress(stageID: first.id, state: .completed),
-                SkillStageProgress(stageID: second.id, state: .current),
-                SkillStageProgress(stageID: third.id, state: .futureLocked)
-            ]
-        )
+        XCTAssertEqual(states, [
+            SkillStageProgress(stageID: first.id, state: .completed),
+            SkillStageProgress(stageID: second.id, state: .current),
+            SkillStageProgress(stageID: third.id, state: .futureLocked)
+        ])
     }
 
-    func testProgressChangesWhenLaterQualifyingSessionIsAdded() {
-        let skill = Skill(name: "Editable skill", emoji: "")
-        let stage = makeStage(skill: skill)
+    func testOneDemonstrationCompletesStageEvenWithLegacyConfirmationCount() {
+        let skill = Skill(name: "Skill", emoji: "")
+        let stage = SkillStage(name: "Stage", orderIndex: 0, skill: skill)
         skill.stages = [stage]
-        let exercise = Exercise(name: "Movement", metric: .reps)
-        stage.requirements = [
-            requirement(
-                exercise: exercise,
-                targetReps: 10,
-                confirmationsNeeded: 2,
-                stage: stage
-            )
-        ]
-        let firstSession = session(exercise: exercise, reps: 10)
+        let movement = fixture(metric: .reps)
+        stage.requirements = [requirement(movement.variation, target: 10, confirmationsNeeded: 20, stage: stage)]
 
         XCTAssertEqual(
-            ProgressionEngine.orderedStageStates(for: skill, against: [firstSession]).first?.state,
-            .current
-        )
-
-        let laterSession = session(exercise: exercise, reps: 11)
-        XCTAssertEqual(
-            ProgressionEngine.orderedStageStates(
-                for: skill,
-                against: [firstSession, laterSession]
-            ).first?.state,
+            ProgressionEngine.orderedStageStates(for: skill, against: [session(movement.variation, reps: 10)]).first?.state,
             .completed
         )
     }
 
-    func testExerciseRenamingHasNoEffectOnProgression() {
-        let stage = makeStage()
-        let exercise = Exercise(name: "Original name", metric: .reps)
-        stage.requirements = [requirement(exercise: exercise, targetReps: 10, stage: stage)]
-        let workout = session(exercise: exercise, reps: 10)
-
-        exercise.name = "Renamed movement"
-
-        XCTAssertTrue(ProgressionEngine.isMastered(stage, against: [workout]))
-    }
-
-    func testUnfinishedSessionWithRealResultCounts() {
-        let stage = makeStage()
-        let exercise = Exercise(name: "Movement", metric: .seconds)
-        stage.requirements = [requirement(exercise: exercise, targetSeconds: 20, stage: stage)]
-        let unfinishedSession = session(exercise: exercise, seconds: 20, isCompleted: false)
-
-        XCTAssertNil(unfinishedSession.completedAt)
-        XCTAssertTrue(ProgressionEngine.isMastered(stage, against: [unfinishedSession]))
-    }
-
-    func testJourneyLevelUsesSameGenericMasteryLogicAsSkillStage() {
-        let level = JourneyLevel(number: 2, name: "Editable level")
-        let stage = makeStage()
-        let exercise = Exercise(name: "Movement", metric: .reps)
-        let levelRequirement = Requirement(
-            title: "Level target",
-            exerciseID: exercise.id,
-            metric: .reps,
-            targetReps: 10,
-            confirmationsNeeded: 1,
-            journeyLevel: level
-        )
-        let stageRequirement = requirement(exercise: exercise, targetReps: 10, stage: stage)
-        level.genericRequirements = [levelRequirement]
-        stage.requirements = [stageRequirement]
-        let sessions = [session(exercise: exercise, reps: 10)]
+    func testExplicitImplicationCanCompleteEarlierStageWithoutStageOrderInference() {
+        let skill = Skill(name: "Skill", emoji: "")
+        let earlier = SkillStage(name: "Earlier", orderIndex: 0, skill: skill)
+        let later = SkillStage(name: "Later", orderIndex: 1, skill: skill)
+        skill.stages = [earlier, later]
+        let earlierMovement = fixture(metric: .reps)
+        let laterMovement = fixture(metric: .reps)
+        let low = requirement(earlierMovement.variation, target: 5, stage: earlier)
+        let high = requirement(laterMovement.variation, target: 10, stage: later)
+        earlier.requirements = [low]
+        later.requirements = [high]
+        let history = [session(laterMovement.variation, reps: 10)]
 
         XCTAssertEqual(
-            ProgressionEngine.isMastered(level, against: sessions),
-            ProgressionEngine.isMastered(stage, against: sessions)
+            ProgressionEngine.orderedStageStates(for: skill, against: history).map(\.state),
+            [.current, .futureLocked]
         )
-        XCTAssertTrue(ProgressionEngine.isMastered(level, against: sessions))
+        let implication = RequirementImplication(source: high, implies: low)
+        XCTAssertEqual(
+            ProgressionEngine.orderedStageStates(for: skill, against: history, implications: [implication]).map(\.state),
+            [.completed, .completed]
+        )
     }
 
-    private func makeStage(
-        name: String = "Stage",
-        orderIndex: Int = 0,
-        skill: Skill? = nil
-    ) -> SkillStage {
-        SkillStage(name: name, orderIndex: orderIndex, skill: skill)
+    func testReevaluationAfterEvidenceRemovalChangesDerivedStageState() {
+        let skill = Skill(name: "Skill", emoji: "")
+        let stage = SkillStage(name: "Stage", orderIndex: 0, isCompleted: true, skill: skill)
+        skill.stages = [stage]
+        let movement = fixture(metric: .seconds)
+        stage.requirements = [requirement(movement.variation, seconds: 10, stage: stage)]
+        let proof = session(movement.variation, seconds: 10)
+        let weak = session(movement.variation, seconds: 4)
+
+        XCTAssertTrue(ProgressionEngine.isMastered(stage, against: [proof, weak]))
+        XCTAssertFalse(ProgressionEngine.isMastered(stage, against: [weak]))
+    }
+
+    func testJourneyLevelUsesSameGenericDerivedLogicForCompatibility() {
+        let level = JourneyLevel(number: 1, name: "Legacy")
+        let stage = SkillStage(name: "Stage", orderIndex: 0)
+        let movement = fixture(metric: .reps)
+        let levelRequirement = Requirement(title: "Level", exerciseID: movement.exercise.id, variationID: movement.variation.id, metric: .reps, evidenceKind: .reps, targetReps: 5, journeyLevel: level)
+        let stageRequirement = requirement(movement.variation, target: 5, stage: stage)
+        level.genericRequirements = [levelRequirement]
+        stage.requirements = [stageRequirement]
+        let history = [session(movement.variation, reps: 5, completed: false)]
+
+        XCTAssertTrue(ProgressionEngine.isMastered(level, against: history))
+        XCTAssertEqual(ProgressionEngine.isMastered(level, against: history), ProgressionEngine.isMastered(stage, against: history))
+    }
+
+    private func fixture(metric: ExerciseMetric) -> (exercise: Exercise, variation: ExerciseVariation) {
+        let exercise = Exercise(name: UUID().uuidString, metric: metric)
+        return (exercise, ExerciseVariation(name: "Exact", metric: metric, exercise: exercise))
     }
 
     private func requirement(
-        exercise: Exercise,
-        targetReps: Int? = nil,
-        targetSeconds: Int? = nil,
-        confirmationsNeeded: Int = 1,
+        _ variation: ExerciseVariation,
+        target: Int? = nil,
+        seconds: Int? = nil,
+        side: PerformanceSide = .notApplicable,
+        confirmationsNeeded: Int = 2,
         stage: SkillStage
     ) -> Requirement {
-        Requirement(
-            title: "Editable requirement",
-            exerciseID: exercise.id,
-            metric: targetSeconds == nil ? .reps : .seconds,
-            targetReps: targetReps,
-            targetSeconds: targetSeconds,
-            confirmationsNeeded: confirmationsNeeded,
-            skillStage: stage
-        )
+        let kind: RequirementEvidenceKind = seconds == nil ? .reps : .seconds
+        return Requirement(title: "Requirement", exerciseID: variation.exercise?.id, variationID: variation.id, metric: seconds == nil ? .reps : .seconds, evidenceKind: kind, side: side, targetReps: target, targetSeconds: seconds, confirmationsNeeded: confirmationsNeeded, skillStage: stage)
     }
 
     private func session(
-        exercise: Exercise,
+        _ variation: ExerciseVariation,
         reps: Int? = nil,
         seconds: Int? = nil,
-        isCompleted: Bool = true
+        side: PerformanceSide = .notApplicable,
+        completed: Bool = true
     ) -> WorkoutSession {
-        let workout = WorkoutSession(workoutName: "Test Workout")
-        if isCompleted {
-            workout.completedAt = .now
-        }
-
-        let log = ExerciseLog(exercise: exercise, orderIndex: 0, session: workout)
-        let set = SetLog(
-            setNumber: 1,
-            reps: reps,
-            seconds: seconds,
-            exerciseLog: log
-        )
+        let workout = WorkoutSession(workoutName: "Workout")
+        if completed { workout.completedAt = .now }
+        let log = ExerciseLog(exercise: variation.exercise!, variation: variation, orderIndex: 0, session: workout)
+        let set = SetLog(setNumber: 1, reps: reps, seconds: seconds, side: side, variation: variation, exerciseLog: log)
         log.sets = [set]
         workout.exerciseLogs = [log]
         return workout
