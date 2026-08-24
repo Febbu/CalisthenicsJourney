@@ -9,6 +9,7 @@ struct CalisthenicsJourneyApp: App {
         }
         .modelContainer(for: [
             Exercise.self,
+            ExerciseVariation.self,
             WorkoutTemplate.self,
             WorkoutTemplateExercise.self,
             WorkoutSession.self,

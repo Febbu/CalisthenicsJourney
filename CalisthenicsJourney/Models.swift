@@ -7,6 +7,36 @@ enum ExerciseMetric: String, Codable, CaseIterable {
     case seconds
 }
 
+enum PerformanceSide: String, Codable, CaseIterable {
+    case notApplicable
+    case left
+    case right
+}
+
+enum EffortKind: String, Codable, CaseIterable {
+    case numeric
+    case attempt
+}
+
+enum AttemptOutcome: String, Codable, CaseIterable {
+    case successful
+    case unsuccessful
+}
+
+struct NumericTargetSnapshot: Equatable {
+    let weight: Double?
+    let minReps: Int?
+    let maxReps: Int?
+    let seconds: Int?
+}
+
+struct ActualPerformanceSnapshot: Equatable {
+    let weight: Double?
+    let reps: Int?
+    let seconds: Int?
+    let attemptOutcome: AttemptOutcome?
+}
+
 @Model
 final class Exercise {
     @Attribute(.unique) var id: UUID
@@ -14,6 +44,9 @@ final class Exercise {
     var metricRaw: String
     var createdAt: Date
     var updatedAt: Date
+
+    @Relationship(deleteRule: .cascade, inverse: \ExerciseVariation.exercise)
+    var variations: [ExerciseVariation] = []
 
     var metric: ExerciseMetric {
         get { ExerciseMetric(rawValue: metricRaw) ?? .reps }
@@ -26,6 +59,37 @@ final class Exercise {
         self.metricRaw = metric.rawValue
         self.createdAt = .now
         self.updatedAt = .now
+    }
+}
+
+@Model
+final class ExerciseVariation {
+    @Attribute(.unique) var id: UUID
+    var name: String
+    var metricRaw: String
+    var isLegacyDefault: Bool
+    var createdAt: Date
+    var updatedAt: Date
+    var exercise: Exercise?
+
+    var metric: ExerciseMetric {
+        get { ExerciseMetric(rawValue: metricRaw) ?? .reps }
+        set { metricRaw = newValue.rawValue }
+    }
+
+    init(
+        name: String,
+        metric: ExerciseMetric,
+        isLegacyDefault: Bool = false,
+        exercise: Exercise? = nil
+    ) {
+        self.id = UUID()
+        self.name = name
+        self.metricRaw = metric.rawValue
+        self.isLegacyDefault = isLegacyDefault
+        self.createdAt = .now
+        self.updatedAt = .now
+        self.exercise = exercise
     }
 }
 
@@ -101,6 +165,9 @@ final class ExerciseLog {
     var exerciseID: UUID
     var exerciseName: String
     var metricRaw: String = ExerciseMetric.reps.rawValue
+    var variationID: UUID?
+    var variationName: String?
+    var variation: ExerciseVariation?
 
     var metric: ExerciseMetric {
         get { ExerciseMetric(rawValue: metricRaw) ?? .reps }
@@ -113,11 +180,19 @@ final class ExerciseLog {
     @Relationship(deleteRule: .cascade, inverse: \SetLog.exerciseLog)
     var sets: [SetLog] = []
 
-    init(exercise: Exercise, orderIndex: Int, session: WorkoutSession? = nil) {
+    init(
+        exercise: Exercise,
+        variation: ExerciseVariation? = nil,
+        orderIndex: Int,
+        session: WorkoutSession? = nil
+    ) {
         self.id = UUID()
         self.exerciseID = exercise.id
         self.exerciseName = exercise.name
-        self.metricRaw = exercise.metric.rawValue
+        self.metricRaw = (variation?.metric ?? exercise.metric).rawValue
+        self.variationID = variation?.id
+        self.variationName = variation?.name
+        self.variation = variation
         self.orderIndex = orderIndex
         self.session = session
     }
@@ -131,7 +206,66 @@ final class SetLog {
     var reps: Int?
     var seconds: Int?
     var rir: Int?
+    var targetWeight: Double?
+    var targetMinReps: Int?
+    var targetMaxReps: Int?
+    var targetSeconds: Int?
+    var sideRaw: String?
+    var effortKindRaw: String?
+    var attemptOutcomeRaw: String?
+    var variationID: UUID?
+    var variationName: String?
+    var variation: ExerciseVariation?
     var exerciseLog: ExerciseLog?
+
+    var side: PerformanceSide {
+        get { sideRaw.flatMap(PerformanceSide.init(rawValue:)) ?? .notApplicable }
+        set { sideRaw = newValue.rawValue }
+    }
+
+    var effortKind: EffortKind {
+        get { effortKindRaw.flatMap(EffortKind.init(rawValue:)) ?? .numeric }
+        set { effortKindRaw = newValue.rawValue }
+    }
+
+    var attemptOutcome: AttemptOutcome? {
+        get { attemptOutcomeRaw.flatMap(AttemptOutcome.init(rawValue:)) }
+        set { attemptOutcomeRaw = newValue?.rawValue }
+    }
+
+    var hasActualPerformanceEvidence: Bool {
+        weight != nil || reps != nil || seconds != nil || attemptOutcome != nil
+    }
+
+    var evidenceVariationID: UUID? {
+        variationID ?? exerciseLog?.variationID
+    }
+
+    var evidenceMetric: ExerciseMetric {
+        variation?.metric ?? exerciseLog?.metric ?? .reps
+    }
+
+    var isAttempt: Bool {
+        effortKind == .attempt
+    }
+
+    var targetSnapshot: NumericTargetSnapshot {
+        NumericTargetSnapshot(
+            weight: targetWeight,
+            minReps: targetMinReps,
+            maxReps: targetMaxReps,
+            seconds: targetSeconds
+        )
+    }
+
+    var actualSnapshot: ActualPerformanceSnapshot {
+        ActualPerformanceSnapshot(
+            weight: weight,
+            reps: reps,
+            seconds: seconds,
+            attemptOutcome: attemptOutcome
+        )
+    }
 
     init(
         setNumber: Int,
@@ -139,6 +273,14 @@ final class SetLog {
         reps: Int? = nil,
         seconds: Int? = nil,
         rir: Int? = nil,
+        targetWeight: Double? = nil,
+        targetMinReps: Int? = nil,
+        targetMaxReps: Int? = nil,
+        targetSeconds: Int? = nil,
+        side: PerformanceSide = .notApplicable,
+        effortKind: EffortKind = .numeric,
+        attemptOutcome: AttemptOutcome? = nil,
+        variation: ExerciseVariation? = nil,
         exerciseLog: ExerciseLog? = nil
     ) {
         self.id = UUID()
@@ -147,6 +289,16 @@ final class SetLog {
         self.reps = reps
         self.seconds = seconds
         self.rir = rir
+        self.targetWeight = targetWeight
+        self.targetMinReps = targetMinReps
+        self.targetMaxReps = targetMaxReps
+        self.targetSeconds = targetSeconds
+        self.sideRaw = side.rawValue
+        self.effortKindRaw = effortKind.rawValue
+        self.attemptOutcomeRaw = attemptOutcome?.rawValue
+        self.variationID = variation?.id
+        self.variationName = variation?.name
+        self.variation = variation
         self.exerciseLog = exerciseLog
     }
 }

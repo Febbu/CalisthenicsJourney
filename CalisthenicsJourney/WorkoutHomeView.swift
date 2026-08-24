@@ -63,12 +63,28 @@ struct WorkoutHomeView: View {
 
         for item in template.exercises.sorted(by: { $0.orderIndex < $1.orderIndex }) {
             guard let exercise = item.exercise else { continue }
-            let log = ExerciseLog(exercise: exercise, orderIndex: item.orderIndex, session: session)
+            let variation = EvidenceMigration.defaultVariation(
+                for: exercise,
+                context: modelContext
+            )
+            let log = ExerciseLog(
+                exercise: exercise,
+                variation: variation,
+                orderIndex: item.orderIndex,
+                session: session
+            )
             modelContext.insert(log)
             session.exerciseLogs.append(log)
 
             for number in 1...item.targetSets {
-                let set = SetLog(setNumber: number, exerciseLog: log)
+                let set = SetLog(
+                    setNumber: number,
+                    targetMinReps: item.minReps,
+                    targetMaxReps: item.maxReps,
+                    targetSeconds: item.targetSeconds,
+                    variation: variation,
+                    exerciseLog: log
+                )
                 modelContext.insert(set)
                 log.sets.append(set)
             }

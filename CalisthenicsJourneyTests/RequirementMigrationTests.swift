@@ -112,6 +112,7 @@ final class RequirementMigrationTests: XCTestCase {
         let configuration = ModelConfiguration(isStoredInMemoryOnly: true)
         return try ModelContainer(
             for: Exercise.self,
+            ExerciseVariation.self,
             WorkoutTemplate.self,
             WorkoutTemplateExercise.self,
             WorkoutSession.self,
