@@ -213,6 +213,20 @@ movement. Viewing it is guidance, not proof of readiness or mastery. Preparation
 remains optional, and skipping it does not block the workout or progression;
 the athlete decides whether they are ready to attempt the movement.
 
+## 1.11 Safety competencies are optional side branches
+
+A safety competency should eventually be representable as a small side branch
+associated with the relevant part of a Skill rather than a gate in the primary
+progression path. It may show its own demonstrated/not-demonstrated state and
+remain legitimately masterable through successful evidence, but it must not
+block main-path progression or carry the same required-workout importance as a
+normal main-path node.
+
+This is a product/topology rule, not a locked visual design or a redesign of the
+nine approved tree blocks below. Those canonical blocks remain unchanged in
+this checkpoint while future data relationships must support the nonblocking
+side-branch meaning.
+
 ---
 
 # 2. V1 skill catalog
@@ -1341,6 +1355,25 @@ Trying a competency is not mastery evidence. The athlete must confirm that it
 was successfully performed to the required standard. V1 does not require
 camera analysis, sensors, or automated form recognition to judge the movement.
 
+Record every performed attempt independently as successful or unsuccessful:
+
+```text
+Attempt 1 → unsuccessful
+Attempt 2 → unsuccessful
+Attempt 3 → successful
+```
+
+Both outcomes are real historical performance. A successful attempt may satisfy
+an explicitly related mastery requirement. An unsuccessful attempt does not
+award mastery, but remains useful history and can reveal improving consistency
+across workouts without inventing a rep or seconds metric.
+
+```text
+Workout A: unsuccessful / unsuccessful / successful
+Workout B: unsuccessful / successful / successful
+Workout C: successful / successful / successful
+```
+
 The successful confirmation is durable historical evidence, not an unexplained
 permanent mastery boolean. If that event is later edited or deleted, affected
 mastery is reevaluated like any other evidence-derived mastery.
@@ -1348,6 +1381,37 @@ mastery is reevaluated like any other evidence-derived mastery.
 Do not invent a mandatory number of attempts for every technique/control node.
 The exact confirmation UI and the approved performance standard for each such
 competency remain later content and UI decisions.
+
+A successful attempt does not automatically end ordinary technique practice.
+Mastery answers whether the athlete demonstrated the capability; practice
+answers whether they want or need to continue. Preserve every performed attempt
+and let the athlete continue practicing after success.
+
+Safety-movement practice is recommended rather than mandatory progression
+volume. It may be surfaced prominently, practiced as much or as little as the
+athlete chooses, and award its explicitly related competency after success. It:
+
+- is not a workout-completion or main-progression gate;
+- has no mandatory or automatically increasing attempt count; and
+- does not use the normal +2/+1/+1 rep/hold progression.
+
+A safety competency may also have a separate athlete-controlled confidence
+preference, conceptually **I feel confident with this**. Confidence may stop
+routine safety-practice recommendations, but it does not fabricate successful
+evidence, award mastery, erase unsuccessful attempts, certify readiness, or
+prevent later practice.
+
+Keep the states distinct:
+
+```text
+Evidence   → what happened on each attempt
+Mastery    → what was successfully demonstrated
+Confidence → whether routine safety practice is still desired
+```
+
+If the athlete records only unsuccessful attempts and then marks confidence,
+those attempts remain, mastery is not awarded, routine recommendation may stop,
+and main-path progression remains unblocked.
 
 ## 12.10 Holds and timers
 
@@ -1537,6 +1601,24 @@ Do not implement elapsed-time detraining or prescription decay in V1. When an
 exercise returns after weeks or months, use its last known variation and
 prescription. Actual performance and manual athlete choices correct stale data.
 
+When progression unlocks a variation, establish its starting prescription from
+real information in this order:
+
+1. restore usable stored prescription state for that exact variation;
+2. otherwise use sufficient prior performance evidence for that exact variation
+   when it genuinely establishes a repeatable starting workload; or
+3. otherwise use the existing lightweight calibration flow.
+
+Never start arbitrarily at 1 or translate repetitions/seconds from another
+variation. A single prior set on the new variation may prove capability or
+mastery without being sufficient to initialize a three-set prescription. Do not
+invent a rigid sufficiency formula; use calibration when exact-variation
+history does not establish usable repeatable workload.
+
+Returning to a previously trained variation restores its stored prescription
+without recalibration merely because time passed. Subsequent reality corrects
+stale state through the existing rules.
+
 ## 14.4 Mastery evidence and active-session stability
 
 One performance receives credit for every explicitly related mastery checkpoint
@@ -1546,6 +1628,16 @@ unrelated abilities or a generic harder-looking-skill relationship.
 Mastery may be recognized immediately during an active workout, but it does not
 automatically rewrite the remaining session. Completed and planned work remain
 stable except for explicit athlete edits or the live-regeneration rules below.
+
+If a focus Skill becomes fully mastered, recognize it immediately but do not
+inject the next queued Skill or extend the current workout. Recalculate the
+ordered focus list after session reconciliation so the newly promoted Skill
+begins intentional training with the next workout. Likewise, a newly unlocked
+exercise variation is not injected and does not trigger mandatory mid-workout
+calibration; initialize it when it becomes relevant to future generated work.
+
+This stability rule is intentionally different from live regeneration after an
+athlete changes equipment, selection, or priority.
 
 Mastery is derived from valid evidence history. If evidence is edited or
 deleted, reevaluate the directly and dependently supported nodes. Mastery
@@ -1570,9 +1662,17 @@ selected by generation.
 
 If the app reopens with an unfinished workout, offer Resume or
 Discard/Abandon. Resume restores the active plan and logged work. Abandon stops
-the session but preserves real evidence already logged; partial evidence may
-still support PBs or mastery, but it cannot adapt an incomplete exercise.
-Editing/deleting evidence is a separate history action.
+the remaining plan but preserves and processes real work already logged:
+
+- a completed eligible same-variation three-set exercise adapts normally;
+- a completed mixed-variation exercise preserves history and next-default
+  variation logic without numeric adaptation;
+- a partial exercise preserves PB/mastery evidence but does not adapt; and
+- skipped/unstarted work creates no evidence and does not adapt.
+
+Abandonment therefore finalizes completed exercises independently rather than
+making adaptation depend on formal whole-workout completion. Editing/deleting
+evidence is a separate history action.
 
 ## 14.6 Live regeneration protects started work
 
@@ -1583,9 +1683,10 @@ If one changes during an active session:
 - started exercises remain untouched by automatic regeneration; and
 - unstarted exercises may regenerate from the new live profile.
 
-An exercise becomes started/protected once any actual rep, hold, or successful
-attempt is logged. Merely viewing it does not count. Protection constrains the
-automatic generator, not the athlete: manual variation changes remain allowed.
+An exercise becomes started/protected once any actual rep, hold, or attempt is
+logged. Both successful and unsuccessful attempts count as started. Merely
+viewing the exercise does not. Protection constrains the automatic generator,
+not the athlete: manual variation changes remain allowed.
 
 If a generated workout has no logged performance yet, regenerate the full plan
 after a relevant profile change instead of retaining an obsolete plan.

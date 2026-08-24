@@ -397,8 +397,9 @@ Store relevant snapshot data such as:
 -   entered sets/results.
 
 An active session must distinguish completed, started, and unstarted exercise
-work. Logged evidence makes an exercise started/protected from automatic
-regeneration; merely viewing it does not.
+work. Any logged actual rep, hold, or attempt makes an exercise
+started/protected from automatic regeneration; an unsuccessful attempt counts,
+while merely viewing the exercise does not.
 
 This distinction helps future editing and migrations.
 
@@ -412,9 +413,11 @@ session.
 A `SetLog` represents one recorded effort.
 
 Set evidence should preserve the prescribed target, actual result, and exercise
-variation used. Technique/control attempts must distinguish attempted from
-athlete-confirmed successful demonstration. A skipped exercise is absence of
-performance evidence, not a synthetic zero-valued SetLog.
+variation used. Every performed technique/control attempt is its own historical
+record and must distinguish successful from unsuccessful. Both outcomes are
+evidence events, although only success may satisfy an associated mastery
+requirement. A skipped exercise is absence of performance evidence, not a
+synthetic zero-valued SetLog.
 
 Set-like storage may also represent attempts for skill practice.
 
@@ -484,6 +487,13 @@ Avoid storing too much redundant state if it can be derived reliably.
 For example, if completion can be determined from requirements, do not
 also maintain multiple competing booleans unless there is a clear
 reason.
+
+The topology must permit optional, nonblocking safety-competency side branches
+related to a relevant Skill/Stage without forcing them into the primary path.
+Any athlete confidence/preference about routine safety-practice recommendation
+is separate from evidence and derived mastery; it must not fabricate successful
+performance or gate main progression. Do not finalize a specific persistence
+shape until implementation requires it.
 
 ------------------------------------------------------------------------
 
@@ -578,9 +588,10 @@ the surrounding exercise or workout is incomplete.
 
 Technique/control requirements may use successful-attempt confirmation rather
 than rep or duration thresholds. The evaluator must distinguish a logged
-attempt from an athlete-confirmed successful demonstration. Coaching content
-and whether it was viewed must remain outside this evaluation. V1 does not
-require automated camera, sensor, or form-recognition judgment.
+unsuccessful attempt from an athlete-confirmed successful demonstration. Both
+remain history, but only success may qualify for mastery. Coaching content and
+whether it was viewed must remain outside this evaluation. V1 does not require
+automated camera, sensor, or form-recognition judgment.
 
 Mastery must remain derived from evidence rather than an unexplained permanent
 boolean. Editing or deleting evidence triggers reevaluation of directly and
@@ -861,17 +872,31 @@ Overall workout completion is separate historical/UI state.
 When a session concludes, save actual evidence, evaluate mastery, update each
 eligible exercise prescription, recalculate progression, and generate future
 training from the new state. Recognition of mastery during an active workout
-must not automatically rewrite remaining work.
+must not automatically rewrite remaining work. Completing a focus Skill does
+not inject its newly promoted queued Skill into the current session, and an
+unlocked variation does not trigger mandatory mid-session calibration; both
+affect future generated training after reconciliation.
 
-An unfinished session may be resumed or abandoned. Abandoning stops the plan
-but preserves already-logged evidence; deleting or correcting evidence is a
-separate history-editing action.
+An unfinished session may be resumed or abandoned. Abandoning stops the
+remaining plan but preserves already-logged evidence and finalizes each
+exercise independently: completed eligible same-variation work may adapt,
+mixed/partial work preserves its documented history/default behavior without
+numeric adaptation, and unstarted work does nothing. Deleting or correcting
+evidence is a separate history-editing action.
 
 Automatic live regeneration after equipment, selection, or priority changes
 may modify only unstarted exercises. Completed and started exercises are
 protected; the athlete may still manually change variation between sets. If no
 performance has been logged anywhere, regenerate the whole plan from the live
 profile.
+
+Starting prescription state for an unlocked variation must be variation-local:
+restore usable state for that exact variation, otherwise use sufficient prior
+same-variation workload evidence, otherwise request lightweight calibration.
+Capability evidence such as one successful set may prove mastery without being
+sufficient to initialize repeatable three-set workload. Never translate numeric
+prescriptions from another variation or recalibrate established state merely
+because time elapsed.
 
 ------------------------------------------------------------------------
 
@@ -1431,7 +1456,13 @@ High-value unit tests:
 -   mixed variations select the next default without numeric averaging;
 -   failed exercise does not block another completed exercise from adapting;
 -   abandoning a session preserves logged evidence;
+-   abandoning finalizes completed eligible exercises independently;
 -   automatic regeneration changes only unstarted work;
+-   unsuccessful attempt protects an exercise from automatic regeneration;
+-   mid-workout Skill mastery does not inject a queued Skill or unlocked
+    variation;
+-   new variation restores exact-variation state/evidence or calibrates without
+    translating another variation's numbers;
 -   an entirely unstarted plan regenerates after a relevant profile change.
 
 Testing should focus on mechanics, not pixel-perfect UI.
@@ -1572,6 +1603,10 @@ Unless the project owner explicitly changes them:
     never as all-or-nothing workout completion.
 -   Automatic regeneration may alter only unstarted work; logged evidence
     protects started work without restricting manual athlete changes.
+-   Every performed attempt is history; success may prove mastery, while either
+    success or failure makes the exercise started.
+-   Safety-practice confidence is recommendation preference, never evidence or
+    mastery, and safety side branches do not gate main progression.
 -   Multiple Skills views must derive from the same progression source of
     truth, and categories remain presentation-only metadata.
 
