@@ -72,7 +72,7 @@ summarize.
 
 ### Workout
 
-Where training happens. It provides a workout based on active skills,
+Where training happens. It provides a workout based on focused trainable skills,
 allows overrides/editing, presents exercises one at a time, shows
 previous results, records actual performance, and uses logged results as
 progression evidence.
@@ -81,8 +81,8 @@ progression evidence.
 
 ### Skills
 
-The central progression system: visible/selectable skills, active/inactive
-goal selection, skill trees, completed/current/future stages,
+The central progression system: visible/selectable skills, ordered goal
+priority, skill trees, completed/current/future stages,
 prerequisites, and meaningful mastery milestones.
 
 Skills include advanced movements and basic movement families. Examples:
@@ -109,8 +109,9 @@ graphs/PRs as secondary views.
 
 This is a core mechanic.
 
-The user chooses skills they want to learn. The app uses the user's
-**current stage in each active skill** to determine relevant training.
+The user chooses and orders skills they want to learn. The app uses the
+**current stage in each focused, trainable skill** to determine relevant
+training.
 
 Core flow:
 
@@ -142,22 +143,17 @@ assets.
 The architecture should not assume every tree will remain strictly
 linear forever; future branches/connections must remain possible.
 
-## 7. Mastery means repeatable ability
+## 7. Mastery means demonstrated ability
 
-A single lucky result should not necessarily equal mastery.
+One valid successful performance is sufficient when it meets an approved
+mastery standard. Mastery records **what capability the athlete has actually
+demonstrated**; it is separate from the multi-set prescription used to manage
+repeatable training workload.
 
-Important mastery requirements are confirmed across **separate workout
-sessions**. The initial convention is often **2 confirmations**, but
-confirmation count should ultimately be configurable.
-
-Example: `20 clean Push-ups ×2`.
-
-Workout A reaches 20 → 1/2. A later Workout B reaches 20+ → 2/2 →
-mastered.
-
-Two qualifying sets in the same workout do not count as two separate
-confirmations unless a future requirement explicitly defines different
-semantics.
+Mastery is derived from durable performance evidence. Current underperformance,
+failed workouts, easier training choices, or temporary strength loss do not
+erase it. If historical evidence is edited or deleted, affected mastery must be
+reevaluated and may be revoked only when no remaining valid evidence proves it.
 
 ## 8. Normal workouts provide progression evidence
 
@@ -167,7 +163,7 @@ If the user reaches a requirement during a normal workout, that result
 can satisfy the requirement automatically.
 
 **Training → logged result → requirement evaluator →
-confirmation/mastery → skill progression.**
+evidence/mastery → skill progression.**
 
 Progression should emerge naturally from training.
 
@@ -268,27 +264,38 @@ contextual and concise rather than repeatedly interrupting every workout.
 
 Generated workouts should be assembled from:
 
-1.  active skills/current stages;
+1.  focused trainable skills/current stages;
 2.  exercises required to progress those stages;
 3.  relevant general foundation work;
 4.  available equipment;
 5.  recovery/frequency rules if implemented later.
 
-A user may have at most **3 active skills** at a time. Skills may be
-deactivated and reactivated without losing earned progress.
+Users may select any number of skill goals and arrange them as an ordered
+priority list. The top three selected, trainable, unfinished skills are the
+current workout focus. Lower-priority selections wait in order until a focus
+position opens or the user reorders them; do not rotate every selected skill
+from workout to workout.
 
 Generated workouts should normally fit within about **30–40 minutes** and
-must not exceed **8 exercises**. When multiple active skills benefit from
+must not exceed **8 main exercises**. Eight is a ceiling, never a target. When
+multiple focused skills benefit from
 the same exercise or training quality, the generator should prefer useful
 overlap rather than simply stacking separate exercise lists. Do not add filler
 exercises merely to reach the duration target; workout duration should emerge
 from useful training, optional preparation, and athlete-controlled rest.
 
-Equipment availability changes the **training route**, not the underlying
-skill goal or mastery standard. The app may choose different supporting
-exercises for gym, home, bands, pull-up bars, or other available equipment.
-Do not invent misleading substitutes when a stage genuinely requires
-specific equipment.
+Order useful work as optional preparation, direct skill work by skill priority,
+then supporting work. Direct skill exercises outrank shared supporting work,
+which outranks single-skill supporting work. Deduplicate a shared exercise
+before spending workout slots on lower-value support.
+
+Equipment availability is global, current athlete-profile data established
+during onboarding and editable later. It changes the **training route**, not
+the underlying skill goal, priority, or mastery standard. Never infer equipment
+from selected skills, prescribe unavailable equipment, or invent a substitute
+unless an explicit approved alternative exists. A selected but temporarily
+untrainable skill keeps its history and priority while the next trainable skill
+fills the current focus.
 
 Generated workouts remain editable. The user should ultimately be able
 to add/remove/reorder/replace exercises, alter sets and ranges, and
@@ -362,10 +369,9 @@ evidence rather than vague artificial capability levels. Avoid overcrowding
 advanced skills with long prerequisite checklists; include only the minimum
 meaningful foundation requirements needed to make the progression useful.
 
-The maximum of 3 active skills controls **workout priority**, not which
-skills can accumulate valid progression evidence. Logged performance may
-satisfy requirements for inactive skills when the same real ability is
-relevant.
+Skill selection controls intentional training, not progression eligibility.
+Logged performance may satisfy requirements for any selected or deselected
+skill when the same real ability is explicitly relevant.
 
 Skill trees may eventually branch/connect, so do not design storage under
 the assumption that every skill is forever a single linear list.
@@ -411,6 +417,8 @@ Current principles:
 -   one exercise screen at a time;
 -   previous result when available;
 -   directly editable current results;
+-   targets prefilled for quick confirmation while actual results remain
+    distinct and editable throughout the active workout;
 -   metric-specific inputs;
 -   numeric keyboard;
 -   one Done control at the exercise-screen level;
@@ -466,8 +474,8 @@ to substitute for it.
 **Choose what you want to learn** → **See your current skill-tree
 position** → **Receive training based on current stages** → **Perform
 the workout and log reality** → **Compare against previous performance**
-→ **Automatically evaluate mastery** → **Confirm repeatable achievements
-across sessions** → **Master nodes/unlock progressions** → **Workout
+→ **Automatically evaluate mastery** → **Recognize demonstrated
+achievements** → **Master nodes/unlock progressions** → **Workout
 adapts to new ability** → **Continue progressing**
 
 If a feature does not strengthen this loop, question it before adding
@@ -488,7 +496,8 @@ it.
 10. Do not introduce Overall/Journey Levels into V1 without approval.
 11. Treat actual logged performance as authoritative.
 12. Let normal workouts satisfy progression requirements.
-13. Preserve separate-session mastery confirmation.
+13. Keep mastery derived from valid historical evidence and separate from
+    prescription state.
 14. Keep V1 local-first.
 15. Prioritize functionality over visual polish.
 16. Do not treat seed workout content as finalized.
@@ -536,7 +545,7 @@ The current prototype is a foundation, not the final information
 architecture.
 
 The next major design task is to finalize **remaining validation standards,
-frequency, and multi-skill workout behavior** before
+weekly frequency, and edge-case workout-generation behavior** before
 broad editing interfaces or visual polish.
 
 ## 26. Product test

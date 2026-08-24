@@ -98,7 +98,6 @@ Behavior should depend on data such as:
 -   linked skill stage;
 -   linked requirement;
 -   prerequisites;
--   confirmation count;
 -   unlock relationships.
 
 The app should continue to work if the user renames:
@@ -291,6 +290,11 @@ athlete must view or complete.
 
 An Exercise does not know which SwiftUI screen renders it.
 
+Numeric prescription state belongs to the athlete and a stable exercise
+variation identity, not to each Skill that happens to request that exercise.
+Multiple Skills may reference the same prescription state without duplicating
+it.
+
 ------------------------------------------------------------------------
 
 ## 3.2 Exercise metric configuration
@@ -392,6 +396,10 @@ Store relevant snapshot data such as:
 -   exercise metric configuration at the time;
 -   entered sets/results.
 
+An active session must distinguish completed, started, and unstarted exercise
+work. Logged evidence makes an exercise started/protected from automatic
+regeneration; merely viewing it does not.
+
 This distinction helps future editing and migrations.
 
 ------------------------------------------------------------------------
@@ -402,6 +410,11 @@ An `ExerciseLog` represents the result of one exercise within a workout
 session.
 
 A `SetLog` represents one recorded effort.
+
+Set evidence should preserve the prescribed target, actual result, and exercise
+variation used. Technique/control attempts must distinguish attempted from
+athlete-confirmed successful demonstration. A skipped exercise is absence of
+performance evidence, not a synthetic zero-valued SetLog.
 
 Set-like storage may also represent attempts for skill practice.
 
@@ -435,16 +448,17 @@ A Skill should own or relate to:
 -   ordered or graph-connected stages;
 -   shared/foundational requirements where relevant;
 -   one or more presentation category tags where useful;
--   active/inactive selection state.
+-   selected state and user-controlled priority.
 
 Category tags are for discovery and filtering only. A skill may appear in
 multiple categories (for example Foundation + Push, or Pull + Core +
 Advanced). Categories must not determine mastery, prerequisites, or workout
 behavior.
 
-Skills remain visible/selectable independently of progression state. Active
-state means the WorkoutGenerator should prioritize that goal; it does not
-mean inactive skills are unable to receive valid progression evidence.
+Skills remain visible/selectable independently of progression state. Selection
+and priority guide intentional workout generation; they do not control whether
+valid global evidence may satisfy a Skill's requirements. Trainability is a
+separate derived concern based on current stage, mastery, and equipment.
 
 A Skill must remain editable.
 
@@ -501,8 +515,6 @@ Requirement
 - metric type
 - linked exercise / skill / stage
 - target value(s)
-- confirmations needed
-- confirmation scope
 ```
 
 Examples:
@@ -513,7 +525,6 @@ Examples:
 Exercise ID: <standard push-up UUID>
 Metric: reps
 Target: 20
-Confirmations: 2 separate sessions
 ```
 
 ### Duration requirement
@@ -522,7 +533,6 @@ Confirmations: 2 separate sessions
 Exercise ID: <wall handstand UUID>
 Metric: seconds
 Target: 30
-Confirmations: 2 separate sessions
 ```
 
 ### Weight + reps requirement
@@ -532,7 +542,6 @@ Exercise ID: <lat pulldown UUID>
 Metric: weightAndReps
 Target weight: 100 lb
 Target reps: 12
-Confirmations: 2 separate sessions
 ```
 
 The evaluator should not care about the display name.
@@ -547,7 +556,7 @@ The evaluator should not care about the display name.
 
 and:
 
-> How many distinct qualifying sessions exist for this requirement?
+> Which durable evidence events currently prove this requirement?
 
 It should understand requirement metrics but not UI.
 
@@ -559,21 +568,24 @@ Input:
 - relevant workout history
 
 Output:
-- confirmation count
+- qualifying evidence
 - satisfied/mastered state
 ```
 
-For separate-session mastery, it should count qualifying **sessions**,
-not qualifying sets.
-
-If one session contains three qualifying sets, that still counts as one
-confirmation when the requirement's scope is separate sessions.
+For V1, one valid successful demonstration is sufficient when it meets the
+requirement's approved standard. A qualifying set may prove mastery even when
+the surrounding exercise or workout is incomplete.
 
 Technique/control requirements may use successful-attempt confirmation rather
 than rep or duration thresholds. The evaluator must distinguish a logged
 attempt from an athlete-confirmed successful demonstration. Coaching content
 and whether it was viewed must remain outside this evaluation. V1 does not
 require automated camera, sensor, or form-recognition judgment.
+
+Mastery must remain derived from evidence rather than an unexplained permanent
+boolean. Editing or deleting evidence triggers reevaluation of directly and
+dependently satisfied requirements. Current underperformance never deletes old
+evidence or revokes mastery by itself.
 
 ------------------------------------------------------------------------
 
@@ -656,15 +668,11 @@ OR
 - requirement B
 ```
 
-## CONFIRMATIONS
+## EVIDENCE
 
-A measurable result must be achieved N times under a defined scope.
-
-Current important scope:
-
-``` text
-N distinct workout sessions
-```
+A valid performance event satisfies every explicitly related requirement it
+proves. One result may validate multiple dependent thresholds, but must not
+imply unrelated abilities or rely on appearance/name-based assumptions.
 
 ## PREREQUISITE ENTITY
 
@@ -751,7 +759,7 @@ user goals.
 
 Inputs may include:
 
--   active Skills;
+-   ordered selected Skills;
 -   current Stage for each Skill;
 -   exercises linked to those stages;
 -   general foundation exercises;
@@ -761,10 +769,14 @@ Inputs may include:
 
 Product constraints for generation:
 
--   no more than 3 active skills;
--   no more than 8 exercises in a generated workout;
+-   the top 3 selected, trainable, unfinished Skills form the current focus;
+-   8 main exercises is a ceiling rather than a target;
 -   target a practical workout duration of roughly 30–40 minutes;
 -   prefer useful exercise overlap when multiple skills need similar work;
+-   order optional preparation, direct skill work by Skill priority, then
+    supporting work;
+-   rank direct skill work above shared supporting work, and shared supporting
+    work above single-skill supporting work;
 -   adapt supporting exercises to available equipment without changing the
     underlying skill mastery requirement.
 
@@ -772,10 +784,15 @@ For multiple active skills, prefer a direct pipeline: gather exercises linked
 to relevant current stages, combine them, deduplicate genuinely shared
 exercises, and keep the result manageable. Do not add filler solely to reach a
 duration target or introduce a complex scoring/optimization system before
-specific conflict or trimming needs are established.
+specific conflict or trimming needs are established. When trimming is needed,
+remove work from the bottom of the approved importance hierarchy.
 
 Equipment should be modeled as data (for example, pull-up bar, resistance
 band, dumbbell, cable machine) rather than inferred from exercise names.
+A global athlete equipment profile represents current availability and is
+independent of Skill selection/priority. The generator derives currently
+trainable selected Skills from that profile and must skip unavailable work
+without permanently reordering or deleting the goal.
 A supporting exercise may declare one or more equipment requirements.
 The generator may choose an appropriate alternative route when one exists;
 it must not invent a false equivalent when a skill stage genuinely needs
@@ -793,6 +810,9 @@ It creates a plan.
 
 The actual `WorkoutSession` remains separate and stores what the user
 really did.
+
+Future workouts must be generated from current mastery, selected priorities,
+equipment, and prescription state rather than copied from the prior workout.
 
 ------------------------------------------------------------------------
 
@@ -822,6 +842,36 @@ The session records reality.
 
 If the user changes weight, reps, exercise selection, or another value,
 historical data must reflect the real result.
+
+Prescription adaptation is exercise-level, not workout-level. Only a complete
+eligible three-set performance using the same exercise variation may update
+that variation's numeric prescription. Failed, skipped, partial, and
+mixed-variation exercises remain distinct states:
+
+-   failed complete exercise: preserve evidence and repeat its prescription;
+-   skipped exercise: create no evidence and leave its prescription unchanged;
+-   partial exercise: preserve performed sets as evidence but do not adapt;
+-   mixed variations: preserve every set, choose the next default variation by
+    majority (or the final set when there is no majority), and do not average
+    numeric results across variations.
+
+Other eligible exercises in the same workout still adapt independently.
+Overall workout completion is separate historical/UI state.
+
+When a session concludes, save actual evidence, evaluate mastery, update each
+eligible exercise prescription, recalculate progression, and generate future
+training from the new state. Recognition of mastery during an active workout
+must not automatically rewrite remaining work.
+
+An unfinished session may be resumed or abandoned. Abandoning stops the plan
+but preserves already-logged evidence; deleting or correcting evidence is a
+separate history-editing action.
+
+Automatic live regeneration after equipment, selection, or priority changes
+may modify only unstarted exercises. Completed and started exercises are
+protected; the athlete may still manually change variation between sets. If no
+performance has been logged anywhere, regenerate the whole plan from the live
+profile.
 
 ------------------------------------------------------------------------
 
@@ -1043,7 +1093,7 @@ redraw.
 
 Examples of derived work that may eventually need careful handling:
 
--   requirement confirmation counts;
+-   requirement evidence evaluation;
 -   complete skill-tree state;
 -   generated workout plans;
 -   historical personal-record calculations;
@@ -1206,13 +1256,11 @@ Requirement:
 exerciseID = X
 metric = reps
 targetReps = 20
-confirmationsNeeded = 2
 
 Workout history:
 Session A → exercise X → max reps 20
-Session B → exercise X → max reps 21
 
-RequirementEvaluator → 2 qualifying sessions
+RequirementEvaluator → qualifying performance evidence
 ProgressionEngine → requirement mastered
 ```
 
@@ -1236,7 +1284,6 @@ SkillStage: Assisted Pull-up Mastery
 Requirements:
 - exercise X
 - reps >= target
-- confirmations = 2
 
 When mastered:
 ProgressionEngine examines graph/order
@@ -1350,9 +1397,9 @@ High-value unit tests:
 -   reps threshold;
 -   seconds threshold;
 -   weight + reps threshold;
--   separate-session confirmation;
--   multiple qualifying sets in one session count once;
--   insufficient confirmation count.
+-   athlete-confirmed successful-attempt evidence;
+-   one result satisfying multiple explicitly dependent thresholds;
+-   evidence editing/deletion reevaluating affected mastery.
 
 ### ProgressionEngine
 
@@ -1362,16 +1409,30 @@ High-value unit tests:
     foundational requirement;
 -   the same evidence can satisfy equivalent requirements across multiple
     skill paths without being consumed;
--   inactive skills may reflect valid progress from global workout history;
+-   deselected skills may reflect valid progress from global workout history;
 -   future branching/ANY behavior when those rules are implemented.
 
 ### WorkoutGenerator
 
--   active skill contributes appropriate exercise;
--   inactive skill does not;
+-   top 3 selected/trainable/unfinished skills contribute by priority;
+-   temporarily untrainable selected skill is skipped without reordering;
+-   lower-priority skill fills an unavailable focus position;
 -   generated plan respects current stage;
+-   shared exercises are deduplicated and use one athlete/variation
+    prescription state;
+-   trimming preserves direct and shared work before single-skill support;
 -   general foundation work included when required;
 -   manual override persists separately.
+
+### Prescription and session lifecycle
+
+-   completed same-variation three-set exercise adapts independently;
+-   skipped and partial exercises preserve prescription state;
+-   mixed variations select the next default without numeric averaging;
+-   failed exercise does not block another completed exercise from adapting;
+-   abandoning a session preserves logged evidence;
+-   automatic regeneration changes only unstarted work;
+-   an entirely unstarted plan regenerates after a relevant profile change.
 
 Testing should focus on mechanics, not pixel-perfect UI.
 
@@ -1455,15 +1516,15 @@ This is the primary reason the architecture must remain data-driven.
 
 Before adding visual polish:
 
-1.  Finalize the deferred validation standards, frequency details, and
-    workout-combination behavior identified in `SKILLS.md`.
+1.  Finalize the deferred validation standards, weekly frequency, and
+    edge-case workout-generation behavior identified in `SKILLS.md`.
 2.  Remove the dedicated Progress tab from primary navigation.
 3.  Preserve workout history as a secondary destination.
 4.  Refine models so Skills/Stages can explicitly reference
     requirements.
 5.  Implement `RequirementEvaluator`.
 6.  Implement generic progression handling.
-7.  Build active-skill selection.
+7.  Build ordered skill-goal selection and priority.
 8.  Implement simple skill-driven `WorkoutGenerator`.
 9.  Add workout editing/override.
 10. Add Skill/Stage/Requirement editing.
@@ -1483,7 +1544,8 @@ Unless the project owner explicitly changes them:
 -   Workouts are plans; sessions are historical reality.
 -   Skills drive workout generation.
 -   Progression is requirement-driven.
--   Mastery may require repeated confirmation across sessions.
+-   One valid successful demonstration may satisfy an approved mastery
+    requirement.
 -   Progression consequences are generic/data-driven.
 -   V1 progression is represented directly by Skills and demonstrated abilities; Overall/Journey Levels are deferred.
 -   Seed content is editable data.
@@ -1494,14 +1556,22 @@ Unless the project owner explicitly changes them:
     energy-conscious.
 -   Core screens and workout entry must not require network access or
     heavy background computation.
--   Workout generation must respect active-skill, exercise-count, duration,
-    and equipment constraints from product rules.
+-   Workout generation must respect selected-skill priority, trainability,
+    exercise-count, duration, and equipment constraints from product rules.
 -   Equipment changes the available training route, not the identity or
     mastery standard of a skill.
+-   Equipment availability is global current-profile data and is never inferred
+    from selected Skills.
 -   Skills remain discoverable/selectable regardless of current progression
     state; active selection controls workout priority, not visibility.
 -   Logged evidence is global and reusable across every relevant skill
     requirement; progression evidence is never consumed by one path.
+-   Evidence history, mastery state, and per-variation prescription state are
+    distinct sources of truth.
+-   Prescription adaptation is evaluated per complete same-variation exercise,
+    never as all-or-nothing workout completion.
+-   Automatic regeneration may alter only unstarted work; logged evidence
+    protects started work without restricting manual athlete changes.
 -   Multiple Skills views must derive from the same progression source of
     truth, and categories remain presentation-only metadata.
 
@@ -1554,7 +1624,7 @@ ProgressionEngine
 decides what mastery and current/future progression state follows
 
 WorkoutGenerator
-builds training plans by prioritizing active skills/current needs
+builds training plans from selected priority, trainability, and current needs
 
 SwiftData
 persists everything locally

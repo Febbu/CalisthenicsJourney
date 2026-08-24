@@ -60,6 +60,10 @@ However, previously mastered beginner movements should not be forced into every 
 
 The mastery tree defines when the user has learned the skill to the approved base standard.
 
+One valid successful performance is sufficient when it meets that standard.
+Mastery celebrates demonstrated capability; repeatable multi-set workload is a
+separate prescription concern.
+
 Performance beyond that standard continues to be logged as demonstrated ability.
 
 Examples:
@@ -78,6 +82,10 @@ Previously logged workout evidence may satisfy requirements anywhere that the sa
 Evidence is never consumed by one skill path.
 
 If a later skill requires an ability the user already demonstrated, the corresponding foundation or requirement should already appear satisfied.
+
+Skill selection controls intentional training, not whether legitimate evidence
+counts. A deselected skill may still gain mastery when performance elsewhere
+explicitly satisfies one of its requirements.
 
 ## 1.6 Side-specific evidence must remain side-specific
 
@@ -156,12 +164,10 @@ nodes they validate. Independent nodes must remain outside those relationships.
 The detailed dependent/independent classification of the nine V1 trees is still
 to be approved alongside exercise and validation design.
 
-This behavior should eventually support initial athlete placement, automatic
-progression validation, non-linear and mixed-competency trees, and a future
-`Too Easy` workout action. `Too Easy` does not grant mastery; it only lets the
-user try an appropriate harder progression, whose successful performance may
-provide evidence. A future `Too Hard` action may offer an appropriate regression
-without removing mastery the user has already earned.
+This behavior supports initial athlete placement, automatic progression
+validation, and non-linear or mixed-competency trees. During normal training,
+the athlete may directly choose an easier or harder variation; changing the
+variation is not mastery evidence, while successful performance may be.
 
 ## 1.9 Prefer simple, specific training
 
@@ -200,6 +206,12 @@ when it is not needed. It may eventually include short instructions, a few
 important form cues, common mistakes, relevant safety information, and optional
 visual or video media. Do not require the athlete to read coaching before
 performing an exercise, and do not design a large coaching curriculum for V1.
+
+Safety-critical guidance is the presentation exception: surface important
+safety information prominently the first time before a safety-sensitive
+movement. Viewing it is guidance, not proof of readiness or mastery. Preparation
+remains optional, and skipping it does not block the workout or progression;
+the athlete decides whether they are ready to attempt the movement.
 
 ---
 
@@ -916,6 +928,11 @@ This choice is an initial estimate. Selecting a harder variation is not mastery
 evidence by itself; actual demonstrated performance remains the meaningful
 evidence.
 
+If the athlete does not know which variation fits, calibration must also offer
+a conceptual **Not sure / Start me from the beginning** path. The app may then
+choose the safe beginning of the relevant progression. This fallback remains an
+estimate and does not award mastery merely because it was selected.
+
 ### Choose a comfortable repeatable target
 
 Instead of asking how many repetitions or seconds the athlete can achieve at
@@ -954,6 +971,10 @@ Strict Push-up
 Calibration check:
 Try 5 reps once.
 ```
+
+The recorded calibration performance is real historical evidence. If it
+successfully satisfies an approved mastery requirement, it may validate that
+requirement exactly as the same performance would elsewhere.
 
 ### Adjust before confirmation
 
@@ -1074,15 +1095,16 @@ performance beyond the target are optional.
 ## 12.5 Progressive overload
 
 Progressive overload should remain simple and understandable. For rep-based
-and hold-based work, successful completion of the entire prescription uses the
-athlete's actual three-set performance to establish a normalized baseline, then
-progresses all three sets for the next relevant workout:
+and hold-based work, successful completion of one prescribed exercise across
+all three sets on the same variation uses the athlete's actual performance to
+establish a normalized baseline, then progresses that exercise for the next
+relevant workout:
 
 - each set receives at least **+1**;
 - one set receives one additional **+1**, making its increase **+2**;
 - the set receiving the additional increment rotates across workouts; and
 - the prescription therefore increases by **4 total units** after each
-  successful workout.
+  successful eligible exercise performance.
 
 The exact starting position in the rotation is not important. The additional
 increment must rotate rather than permanently making the same set the largest.
@@ -1124,7 +1146,8 @@ the generic hold-time increment for normal rep- and hold-based prescriptions.
 
 ### Normalize actual performance before applying progression
 
-After the athlete successfully completes a normal three-set prescription:
+After the athlete successfully completes a normal three-set prescription on
+the same exercise variation:
 
 1. add the actual results from all three sets;
 2. divide the total by 3;
@@ -1186,13 +1209,13 @@ Next workout, if Set 3 receives the rotating extra increment:
 ```
 
 Normalization does not reset the rotation. The set receiving the extra +1
-continues to rotate across successful workouts regardless of the normalized
-baseline.
+continues to rotate across successful exercise performances regardless of the
+normalized baseline.
 
 Conceptually:
 
 ```text
-Actual full-workout performance
+Actual complete same-variation exercise performance
 → average all three sets
 → round down
 → equal normalized baseline
@@ -1200,11 +1223,13 @@ Actual full-workout performance
 → next prescription
 ```
 
-## 12.6 Incomplete workouts repeat before regression
+Do not average repetitions or seconds across different variations. Numeric
+adaptation requires three completed sets on the same variation.
 
-One unsuccessful session should not immediately regress the athlete. If the
-full prescription is incomplete, repeat the same prescription at the next
-relevant workout by default:
+## 12.6 Failed, skipped, and partial exercises
+
+A failed complete exercise does not automatically regress the athlete. Repeat
+the same prescription for that exercise at the next relevant workout:
 
 ```text
 Target:
@@ -1222,6 +1247,26 @@ prescription.
 
 Already-earned mastery is never removed by an incomplete workout.
 
+A **skipped exercise** is not a failed exercise and must not create fake
+`0 / 0 / 0` results. It provides no performance evidence, does not adapt or
+regress its prescription, and returns with the same stored variation and
+prescription when next selected. Other completed exercises in the workout still
+adapt normally.
+
+A **partial exercise** preserves every performed set as real history and
+possible PB/mastery evidence, but does not adapt the prescription:
+
+```text
+Target:
+5 / 5 / 5
+
+Actual:
+7 / 6 / —
+```
+
+Do not average two sets. The same prescription remains until a complete
+eligible same-variation three-set performance exists.
+
 ## 12.7 Actual performance drives adaptation without erasing history
 
 The prescribed target is the minimum training goal. The athlete should record
@@ -1235,15 +1280,20 @@ Actual:
 10 / 9 / 8
 ```
 
-Full-workout performance is evidence of repeatable working capacity. The
-normalization rule in section 12.5 lets stronger actual performance raise the
-next baseline without requiring a separate percentage threshold,
-small/moderate/large classification, or accelerated-progression bonus.
+Complete three-set exercise performance is evidence of repeatable working
+capacity. The normalization rule in section 12.5 lets stronger actual
+performance raise the next baseline without requiring a separate percentage
+threshold, small/moderate/large classification, or accelerated-progression
+bonus.
 
 Normalization affects only the next prescription. It does not replace or erase
 the recorded set results. In this example, the athlete's 10-rep first set
 remains part of workout history and may remain personal-best evidence where
 appropriate.
+
+Target and actual remain separate. If the target is 5 and the athlete performs
+3, preserve the target as 5 and record the actual as 3; do not rewrite the
+benchmark to match underperformance.
 
 ## 12.8 Personal bests motivate; they do not prescribe
 
@@ -1264,6 +1314,14 @@ You may try to beat your best.
 
 Any performance beyond the target must still be recorded as actual reality.
 
+Keep three concepts distinct:
+
+- **PB** is the best recorded individual performance;
+- **mastery** is a demonstrated capability/checkpoint; and
+- **prescription** is the current repeatable training workload.
+
+They may hold different values and must not overwrite one another.
+
 ## 12.9 Technique and control use successful-attempt confirmation
 
 Some technique, control, coordination, or safety competencies do not fit normal
@@ -1282,6 +1340,10 @@ Successfully demonstrated
 Trying a competency is not mastery evidence. The athlete must confirm that it
 was successfully performed to the required standard. V1 does not require
 camera analysis, sensors, or automated form recognition to judge the movement.
+
+The successful confirmation is durable historical evidence, not an unexplained
+permanent mastery boolean. If that event is later edited or deleted, affected
+mastery is reevaluated like any other evidence-derived mastery.
 
 Do not invent a mandatory number of attempts for every technique/control node.
 The exact confirmation UI and the approved performance standard for each such
@@ -1342,21 +1404,76 @@ Examples include:
 These machine exercises are not additions to the currently approved default
 skill sequences.
 
+Equipment availability is global, current athlete-profile data established
+during onboarding and easy to change later. It describes what is available now,
+not permanent ownership. It is independent of selected skills and priority:
+
+```text
+athlete equipment availability
+→ possible exercises
+→ currently trainable selected skills
+```
+
+Never infer availability from selected goals or alter the equipment profile
+when a skill is deselected. Workout generation must not prescribe unavailable
+equipment or invent an alternative unless the exercise/stage explicitly
+defines one.
+
+A selected goal may remain temporarily untrainable. Preserve its mastery,
+history, and priority; identify the missing equipment, skip it during generation,
+and use the next trainable selected skill. When equipment returns, the goal
+becomes eligible again at its existing priority.
+
 ---
 
 # 13. V1 multi-skill workout assembly
 
-Multi-skill workout generation should remain simple. For the active skills:
+Users may select more than three skill goals and maintain them as an ordered,
+user-controlled priority list. The top three selected, trainable, unfinished
+skills are the current focus. Lower-priority skills form a queue; when a focus
+skill is fully mastered, the next eligible selection moves into the available
+position. The user may reorder priorities whenever desired.
 
-1. determine the exercises relevant to their current stages;
-2. combine those candidate exercises;
-3. deduplicate genuinely shared exercises where appropriate;
-4. avoid filler exercises added merely to make the workout appear larger; and
-5. keep the final workout manageable.
+Do not rotate every selected skill from workout to workout. Selecting many
+skills is allowed, but lower-priority goals may wait longer and the app should
+explain that tradeoff. The UI may use any simple reorderable presentation; a
+literal podium is not required.
+
+Multi-skill workout generation should remain simple:
+
+1. determine exercises relevant to the current focused skills and stages;
+2. combine the candidates;
+3. deduplicate genuinely shared exercises;
+4. order optional preparation first, direct skill work by skill priority
+   second, and supporting work last;
+5. rank direct skill work above shared supporting work, and shared supporting
+   work above single-skill supporting work; and
+6. trim from the bottom of that hierarchy when needed.
+
+The athlete should be freshest for direct work on the skills they are trying to
+learn. Supporting work must not exhaust them first.
+
+The same exercise must appear only once when several Skills legitimately
+request it. For example, if Muscle-up, Front Lever, and Pull-up all request
+Strict Pull-ups, perform Strict Pull-ups once; that result may provide training
+value and evidence everywhere it is explicitly referenced.
+
+Prescription state belongs to the athlete and exercise variation, not to each
+requesting Skill:
+
+```text
+one athlete + one exercise variation
+→ one current prescription state
+```
 
 The approved trees and training sequences provide the core exercise content.
 Do not add accessory work solely to fill workout space. Optional preparation
 remains separate from the main required exercise count as already documented.
+
+Eight main exercises is a ceiling, never a target. A useful workout may contain
+4, 5, 6, 7, or 8 exercises. Deduplicate before allocating remaining slots, and
+if candidates exceed eight, preserve direct/shared work before lower-value
+single-skill support.
 
 Workout duration should emerge from relevant exercises, the normal set
 structure, optional preparation, and athlete-controlled rest. Favor useful,
@@ -1367,12 +1484,121 @@ algorithm without a demonstrated need.
 
 ---
 
-# 14. Prescription and workout decisions still deferred
+# 14. Active workout and evidence lifecycle
+
+## 14.1 Fast target-versus-actual logging
+
+During normal training, keep the target visible and prefill it for quick
+confirmation. If the athlete performs the target, logging should take minimal
+interaction; if they perform more or less, they edit the actual value.
+
+Completed sets remain editable throughout the active workout. The athlete may
+reopen and correct a prior set without a mandatory end-of-workout review screen.
+The prescribed target remains the benchmark and must not be rewritten to match
+the actual result.
+
+## 14.2 Manual variation changes and mixed sets
+
+The athlete may manually choose an easier or harder variation between sets.
+Record the variation on each set. This replaces rigid `Too Easy` / `Too Hard`
+behavior during normal training; the athlete may change again at any time.
+
+The variation used for the majority of completed sets becomes the default next
+time. If every completed set uses a different variation and no majority exists,
+use the final-set variation as the next default.
+
+Mixed-variation results remain valid history/evidence, but do not drive numeric
+adaptation:
+
+```text
+Incline: 8
+Incline: 7
+Wall: 12
+```
+
+Choose Incline as the next default by majority, but do not average `8 + 7 + 12`.
+The chosen variation retains its previous prescription until a complete
+same-variation three-set performance exists.
+
+## 14.3 Adapt each exercise independently
+
+Progression/adaptation is evaluated per prescribed exercise, not all-or-nothing
+per workout. A completed eligible Planche exercise may adapt even when a
+Pull-up exercise is skipped or failed. Overall workout completion may still be
+recorded separately for history or UI.
+
+Mastery and prescription remain independent. One successful valid performance
+that meets a mastery threshold awards that node even if the athlete does not
+complete the surrounding three-set prescription. Current failure, choosing an
+easier variation, or repeated bad workouts never removes earned mastery or
+automatically forces a lower variation.
+
+Do not implement elapsed-time detraining or prescription decay in V1. When an
+exercise returns after weeks or months, use its last known variation and
+prescription. Actual performance and manual athlete choices correct stale data.
+
+## 14.4 Mastery evidence and active-session stability
+
+One performance receives credit for every explicitly related mastery checkpoint
+it proves, including lower dependent rep/hold thresholds. It must not imply
+unrelated abilities or a generic harder-looking-skill relationship.
+
+Mastery may be recognized immediately during an active workout, but it does not
+automatically rewrite the remaining session. Completed and planned work remain
+stable except for explicit athlete edits or the live-regeneration rules below.
+
+Mastery is derived from valid evidence history. If evidence is edited or
+deleted, reevaluate the directly and dependently supported nodes. Mastery
+remains if other valid evidence still proves it and may be revoked only when no
+valid evidence remains. Current underperformance never revokes historical
+mastery.
+
+## 14.5 Concluding, resuming, and abandoning a session
+
+When the athlete concludes a workout:
+
+1. save all actual evidence;
+2. evaluate and award mastery;
+3. update eligible per-exercise prescriptions;
+4. recalculate current mastery/stage state; and
+5. generate future training from the new state.
+
+Do not copy the previous workout forward. Mastery determines what needs
+training; performance determines how selected exercises are prescribed. Keep
+old exercise/variation prescription history even when it is not currently
+selected by generation.
+
+If the app reopens with an unfinished workout, offer Resume or
+Discard/Abandon. Resume restores the active plan and logged work. Abandon stops
+the session but preserves real evidence already logged; partial evidence may
+still support PBs or mastery, but it cannot adapt an incomplete exercise.
+Editing/deleting evidence is a separate history action.
+
+## 14.6 Live regeneration protects started work
+
+Workouts remain live with respect to equipment, selected goals, and priorities.
+If one changes during an active session:
+
+- completed exercises remain untouched;
+- started exercises remain untouched by automatic regeneration; and
+- unstarted exercises may regenerate from the new live profile.
+
+An exercise becomes started/protected once any actual rep, hold, or successful
+attempt is logged. Merely viewing it does not count. Protection constrains the
+automatic generator, not the athlete: manual variation changes remain allowed.
+
+If a generated workout has no logged performance yet, regenerate the full plan
+after a relevant profile change instead of retaining an obsolete plan.
+
+---
+
+# 15. Prescription and workout decisions still deferred
 
 Do not yet implement or finalize:
 
 - individual technique/control standards and confirmation UI;
-- detailed multi-skill conflict resolution and trimming behavior;
+- edge-case multi-skill conflict resolution within the approved priority
+  hierarchy;
 - exercise-specific rest recommendations beyond the 90-second default;
 - weekly frequency;
 - richer coaching presentation and media;
