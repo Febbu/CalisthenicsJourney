@@ -64,13 +64,18 @@ enum EvidenceMigration {
             if log.variationID == nil {
                 log.variation = variation
                 log.variationID = variation.id
-                log.variationName = variation.name
+                log.variationName = log.exerciseName
             }
 
-            for set in log.sets where set.variationID == nil {
-                set.variation = variation
-                set.variationID = variation.id
-                set.variationName = variation.name
+            for set in log.sets {
+                if set.metricRaw == nil {
+                    set.metricRaw = log.metric.rawValue
+                }
+                if set.variationID == nil {
+                    set.variation = variation
+                    set.variationID = variation.id
+                    set.variationName = log.exerciseName
+                }
             }
         }
     }

@@ -3,11 +3,11 @@ import SwiftData
 
 @MainActor
 enum SeedData {
-    static func installIfNeeded(context: ModelContext, existingExerciseCount: Int) {
+    static func installIfNeeded(context: ModelContext, existingExerciseCount: Int) throws {
         guard existingExerciseCount == 0 else {
-            try? EvidenceMigration.migrateLegacyExerciseEvidenceIfNeeded(context: context)
+            try EvidenceMigration.migrateLegacyExerciseEvidenceIfNeeded(context: context)
             try? RequirementMigration.migrateLegacyRequirementsIfNeeded(context: context)
-            try? context.save()
+            try context.save()
             return
         }
 
@@ -94,8 +94,8 @@ enum SeedData {
         let muscleUp = Skill(name: "Muscle-up", emoji: "🚀", unlockLevel: 4)
         [pullup, lSit, dips, muscleUp].forEach(context.insert)
 
-        try? EvidenceMigration.migrateLegacyExerciseEvidenceIfNeeded(context: context)
-        try? context.save()
+        try EvidenceMigration.migrateLegacyExerciseEvidenceIfNeeded(context: context)
+        try context.save()
         try? RequirementMigration.migrateLegacyRequirementsIfNeeded(context: context)
         try? context.save()
     }

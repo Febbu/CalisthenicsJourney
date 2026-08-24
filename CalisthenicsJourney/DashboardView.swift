@@ -1,5 +1,11 @@
 import SwiftUI
 import SwiftData
+import OSLog
+
+private let bootstrapLogger = Logger(
+    subsystem: "CalisthenicsJourney",
+    category: "PersistenceBootstrap"
+)
 
 struct DashboardView: View {
     @Environment(\.modelContext) private var modelContext
@@ -13,10 +19,16 @@ struct DashboardView: View {
         }
         .navigationTitle("Dashboard")
         .task {
-            SeedData.installIfNeeded(
-                context: modelContext,
-                existingExerciseCount: exercises.count
-            )
+            do {
+                try SeedData.installIfNeeded(
+                    context: modelContext,
+                    existingExerciseCount: exercises.count
+                )
+            } catch {
+                bootstrapLogger.error(
+                    "Evidence migration failed: \(error.localizedDescription, privacy: .public)"
+                )
+            }
         }
     }
 }

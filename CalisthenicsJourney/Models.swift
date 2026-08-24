@@ -210,6 +210,7 @@ final class SetLog {
     var targetMinReps: Int?
     var targetMaxReps: Int?
     var targetSeconds: Int?
+    var metricRaw: String?
     var sideRaw: String?
     var effortKindRaw: String?
     var attemptOutcomeRaw: String?
@@ -234,7 +235,18 @@ final class SetLog {
     }
 
     var hasActualPerformanceEvidence: Bool {
-        weight != nil || reps != nil || seconds != nil || attemptOutcome != nil
+        if effortKind == .attempt {
+            return attemptOutcome != nil
+        }
+
+        switch evidenceMetric {
+        case .reps:
+            return reps != nil
+        case .seconds:
+            return seconds != nil
+        case .weightAndReps:
+            return weight != nil && reps != nil
+        }
     }
 
     var evidenceVariationID: UUID? {
@@ -242,7 +254,10 @@ final class SetLog {
     }
 
     var evidenceMetric: ExerciseMetric {
-        variation?.metric ?? exerciseLog?.metric ?? .reps
+        metricRaw.flatMap(ExerciseMetric.init(rawValue:))
+            ?? exerciseLog?.metric
+            ?? variation?.metric
+            ?? .reps
     }
 
     var isAttempt: Bool {
@@ -277,6 +292,7 @@ final class SetLog {
         targetMinReps: Int? = nil,
         targetMaxReps: Int? = nil,
         targetSeconds: Int? = nil,
+        metric: ExerciseMetric? = nil,
         side: PerformanceSide = .notApplicable,
         effortKind: EffortKind = .numeric,
         attemptOutcome: AttemptOutcome? = nil,
@@ -293,6 +309,7 @@ final class SetLog {
         self.targetMinReps = targetMinReps
         self.targetMaxReps = targetMaxReps
         self.targetSeconds = targetSeconds
+        self.metricRaw = (metric ?? variation?.metric ?? exerciseLog?.metric)?.rawValue
         self.sideRaw = side.rawValue
         self.effortKindRaw = effortKind.rawValue
         self.attemptOutcomeRaw = attemptOutcome?.rawValue

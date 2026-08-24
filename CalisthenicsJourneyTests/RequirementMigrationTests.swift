@@ -96,7 +96,7 @@ final class RequirementMigrationTests: XCTestCase {
         let container = try makeContainer()
         let context = container.mainContext
 
-        SeedData.installIfNeeded(context: context, existingExerciseCount: 0)
+        try SeedData.installIfNeeded(context: context, existingExerciseCount: 0)
 
         let genericRequirements = try context.fetch(FetchDescriptor<Requirement>())
         let legacyRequirements = try context.fetch(FetchDescriptor<LevelRequirement>())
