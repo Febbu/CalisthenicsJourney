@@ -96,7 +96,7 @@ struct SkillGoalsView: View {
 
     private func deselect(_ goal: SkillGoal) {
         guard let profile else { return }
-        SkillGoalManager.deselect(skillID: goal.skillID, profile: profile)
+        SkillGoalManager.deselect(skillID: goal.skillID, profile: profile, context: modelContext)
         try? modelContext.save()
     }
 
@@ -104,7 +104,11 @@ struct SkillGoalsView: View {
         guard let profile else { return }
         var reordered = selectedGoals
         reordered.move(fromOffsets: source, toOffset: destination)
-        SkillGoalManager.reorder(selectedGoalIDs: reordered.map(\.id), profile: profile)
+        SkillGoalManager.reorder(
+            selectedGoalIDs: reordered.map(\.id),
+            profile: profile,
+            context: modelContext
+        )
         try? modelContext.save()
     }
 }

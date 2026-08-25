@@ -51,6 +51,10 @@ enum EquipmentCatalog {
     private static func item(_ id: String, _ kind: EquipmentKind, _ name: String) -> EquipmentCatalogItem {
         EquipmentCatalogItem(id: UUID(uuidString: id)!, kind: kind, displayName: name)
     }
+
+    static func kind(for id: UUID) -> EquipmentKind? {
+        items.first(where: { $0.id == id })?.kind
+    }
 }
 
 @Model
@@ -217,9 +221,39 @@ enum AthleteProfileBootstrap {
             context.insert(profile)
         }
 
-        var availabilityByEquipmentID = Dictionary(
-            uniqueKeysWithValues: profile.equipmentAvailability.map { ($0.equipmentID, $0) }
+        _ = SkillGoalManager.repairDuplicates(profile: profile, context: context)
+        repairEquipmentAvailability(
+            profile: profile,
+            definitionsByKind: definitionsByKind,
+            context: context
         )
+    }
+
+    private static func repairEquipmentAvailability(
+        profile: AthleteProfile,
+        definitionsByKind: [String: EquipmentDefinition],
+        context: ModelContext
+    ) {
+        let grouped = Dictionary(grouping: profile.equipmentAvailability, by: \.equipmentID)
+        var availabilityByEquipmentID: [UUID: EquipmentAvailability] = [:]
+
+        for (equipmentID, rows) in grouped {
+            let ordered = rows.sorted { $0.id.uuidString < $1.id.uuidString }
+            guard let survivor = ordered.first else { continue }
+            survivor.isAvailable = ordered.contains(where: \.isAvailable)
+            survivor.updatedAt = ordered.map(\.updatedAt).max() ?? survivor.updatedAt
+
+            if let kind = EquipmentCatalog.kind(for: equipmentID),
+               let definition = definitionsByKind[kind.rawValue] {
+                survivor.equipment = definition
+            } else if survivor.equipment?.id != equipmentID {
+                survivor.equipment = nil
+            }
+
+            ordered.dropFirst().forEach(context.delete)
+            availabilityByEquipmentID[equipmentID] = survivor
+        }
+
         for item in EquipmentCatalog.items {
             guard availabilityByEquipmentID[item.id] == nil,
                   let definition = definitionsByKind[item.kind.rawValue] else { continue }
@@ -228,6 +262,7 @@ enum AthleteProfileBootstrap {
             availabilityByEquipmentID[item.id] = availability
         }
     }
+
 }
 
 @MainActor
@@ -237,18 +272,24 @@ enum EquipmentAvailabilityManager {
         equipmentID: UUID,
         profile: AthleteProfile
     ) {
-        guard let availability = profile.equipmentAvailability.first(where: {
-            $0.equipmentID == equipmentID
-        }) else { return }
-        availability.isAvailable = isAvailable
-        availability.updatedAt = .now
+        let matching = profile.equipmentAvailability.filter { $0.equipmentID == equipmentID }
+        guard !matching.isEmpty else { return }
+        for availability in matching {
+            availability.isAvailable = isAvailable
+            availability.updatedAt = .now
+        }
         profile.updatedAt = .now
     }
 
     static func availableKinds(for profile: AthleteProfile) -> Set<EquipmentKind> {
         Set(profile.equipmentAvailability.compactMap { availability in
             guard availability.isAvailable else { return nil }
-            return availability.equipment?.kind
+            if let equipment = availability.equipment,
+               equipment.id == availability.equipmentID,
+               let kind = equipment.kind {
+                return kind
+            }
+            return EquipmentCatalog.kind(for: availability.equipmentID)
         })
     }
 }
@@ -256,43 +297,48 @@ enum EquipmentAvailabilityManager {
 @MainActor
 enum SkillGoalManager {
     static func orderedSelectedGoals(_ goals: [SkillGoal]) -> [SkillGoal] {
-        goals.filter(\.isSelected).sorted {
+        let ordered = goals.filter(\.isSelected).sorted {
             if $0.priority == $1.priority { return $0.id.uuidString < $1.id.uuidString }
             return $0.priority < $1.priority
         }
+        var seenSkillIDs = Set<UUID>()
+        return ordered.filter { seenSkillIDs.insert($0.skillID).inserted }
     }
 
     @discardableResult
     static func select(skill: Skill, profile: AthleteProfile, context: ModelContext) -> SkillGoal {
-        if let existing = profile.skillGoals.first(where: { $0.skillID == skill.id }) {
+        let repaired = repairDuplicates(profile: profile, context: context)
+        if let existing = repaired.first(where: { $0.skillID == skill.id }) {
             if !existing.isSelected {
                 existing.isSelected = true
-                existing.priority = nextPriority(in: profile.skillGoals)
+                existing.priority = nextPriority(in: repaired)
                 existing.updatedAt = .now
                 normalize(profile: profile)
             }
             return existing
         }
 
-        let goal = SkillGoal(skill: skill, priority: nextPriority(in: profile.skillGoals), profile: profile)
+        let goal = SkillGoal(skill: skill, priority: nextPriority(in: repaired), profile: profile)
         context.insert(goal)
         profile.updatedAt = .now
-        normalize(profile: profile)
+        normalize(goals: repaired + [goal])
         return goal
     }
 
-    static func deselect(skillID: UUID, profile: AthleteProfile) {
-        guard let goal = profile.skillGoals.first(where: { $0.skillID == skillID && $0.isSelected }) else {
+    static func deselect(skillID: UUID, profile: AthleteProfile, context: ModelContext) {
+        let repaired = repairDuplicates(profile: profile, context: context)
+        guard let goal = repaired.first(where: { $0.skillID == skillID && $0.isSelected }) else {
             return
         }
         goal.isSelected = false
         goal.updatedAt = .now
         profile.updatedAt = .now
-        normalize(profile: profile)
+        normalize(goals: repaired)
     }
 
-    static func reorder(selectedGoalIDs: [UUID], profile: AthleteProfile) {
-        let selected = orderedSelectedGoals(profile.skillGoals)
+    static func reorder(selectedGoalIDs: [UUID], profile: AthleteProfile, context: ModelContext) {
+        let repaired = repairDuplicates(profile: profile, context: context)
+        let selected = orderedSelectedGoals(repaired)
         let selectedByID = Dictionary(uniqueKeysWithValues: selected.map { ($0.id, $0) })
         var seen = Set<UUID>()
         var ordered = selectedGoalIDs.compactMap { id -> SkillGoal? in
@@ -308,12 +354,35 @@ enum SkillGoalManager {
     }
 
     static func normalize(profile: AthleteProfile) {
-        for (index, goal) in orderedSelectedGoals(profile.skillGoals).enumerated() {
+        normalize(goals: profile.skillGoals)
+    }
+
+    private static func normalize(goals: [SkillGoal]) {
+        for (index, goal) in orderedSelectedGoals(goals).enumerated() {
             goal.priority = index
         }
     }
 
     private static func nextPriority(in goals: [SkillGoal]) -> Int {
         (orderedSelectedGoals(goals).map(\.priority).max() ?? -1) + 1
+    }
+
+    static func repairDuplicates(profile: AthleteProfile, context: ModelContext) -> [SkillGoal] {
+        let grouped = Dictionary(grouping: profile.skillGoals, by: \.skillID)
+        var survivors: [SkillGoal] = []
+        for (_, rows) in grouped {
+            let ordered = rows.sorted { $0.id.uuidString < $1.id.uuidString }
+            guard let survivor = ordered.first else { continue }
+            let selected = ordered.filter(\.isSelected)
+            survivor.isSelected = !selected.isEmpty
+            survivor.priority = (selected.isEmpty ? ordered : selected).map(\.priority).min() ?? survivor.priority
+            survivor.createdAt = ordered.map(\.createdAt).min() ?? survivor.createdAt
+            survivor.updatedAt = ordered.map(\.updatedAt).max() ?? survivor.updatedAt
+            survivor.skill = ordered.compactMap(\.skill).first(where: { $0.id == survivor.skillID })
+            ordered.dropFirst().forEach(context.delete)
+            survivors.append(survivor)
+        }
+        normalize(goals: survivors)
+        return survivors
     }
 }
