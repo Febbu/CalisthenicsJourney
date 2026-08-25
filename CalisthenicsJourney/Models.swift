@@ -567,6 +567,9 @@ final class SkillStage {
     var orderIndex: Int
     var isCurrent: Bool
     var isCompleted: Bool
+    var nodeKindRaw: String = SkillNodeKind.primary.rawValue
+    var prerequisiteModeRaw: String = SkillPrerequisiteMode.all.rawValue
+    var isSkillCompletion: Bool = false
     var skill: Skill?
 
     @Relationship(deleteRule: .cascade, inverse: \Requirement.skillStage)
@@ -577,6 +580,9 @@ final class SkillStage {
         orderIndex: Int,
         isCurrent: Bool = false,
         isCompleted: Bool = false,
+        nodeKind: SkillNodeKind = .primary,
+        prerequisiteMode: SkillPrerequisiteMode = .all,
+        isSkillCompletion: Bool = false,
         skill: Skill? = nil
     ) {
         self.id = UUID()
@@ -584,6 +590,17 @@ final class SkillStage {
         self.orderIndex = orderIndex
         self.isCurrent = isCurrent
         self.isCompleted = isCompleted
+        self.nodeKindRaw = nodeKind.rawValue
+        self.prerequisiteModeRaw = prerequisiteMode.rawValue
+        self.isSkillCompletion = isSkillCompletion
         self.skill = skill
+    }
+
+    var nodeKind: SkillNodeKind? {
+        SkillNodeKind(rawValue: nodeKindRaw)
+    }
+
+    var prerequisiteMode: SkillPrerequisiteMode? {
+        SkillPrerequisiteMode(rawValue: prerequisiteModeRaw)
     }
 }

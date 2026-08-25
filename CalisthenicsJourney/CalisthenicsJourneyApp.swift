@@ -24,7 +24,12 @@ struct CalisthenicsJourneyApp: App {
             EquipmentDefinition.self,
             AthleteProfile.self,
             EquipmentAvailability.self,
-            SkillGoal.self
+            SkillGoal.self,
+            SkillStageConnection.self,
+            SkillExerciseLink.self,
+            VariationEquipmentMapping.self,
+            VariationEquipmentSetup.self,
+            VariationEquipmentItem.self
         ])
     }
 }
