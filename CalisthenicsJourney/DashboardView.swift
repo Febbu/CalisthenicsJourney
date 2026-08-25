@@ -12,10 +12,16 @@ struct DashboardView: View {
     @Query(sort: \Exercise.name) private var exercises: [Exercise]
 
     var body: some View {
-        ContentUnavailableView {
-            Label("Dashboard", systemImage: "rectangle.grid.2x2")
-        } description: {
-            Text("Demonstrated abilities and current training state will appear here as skill progression evolves.")
+        List {
+            Section {
+                Text("Demonstrated abilities and current training state will appear here as skill progression evolves.")
+                    .foregroundStyle(.secondary)
+            }
+
+            Section("Training Profile") {
+                NavigationLink("Equipment", destination: EquipmentSettingsView())
+                NavigationLink("Skill Goals", destination: SkillGoalsView())
+            }
         }
         .navigationTitle("Dashboard")
         .task {

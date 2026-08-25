@@ -20,7 +20,11 @@ struct CalisthenicsJourneyApp: App {
             Requirement.self,
             RequirementImplication.self,
             Skill.self,
-            SkillStage.self
+            SkillStage.self,
+            EquipmentDefinition.self,
+            AthleteProfile.self,
+            EquipmentAvailability.self,
+            SkillGoal.self
         ])
     }
 }

@@ -4,6 +4,8 @@ import SwiftData
 @MainActor
 enum SeedData {
     static func installIfNeeded(context: ModelContext, existingExerciseCount: Int) throws {
+        try AthleteProfileBootstrap.installIfNeeded(context: context)
+
         guard existingExerciseCount == 0 else {
             try EvidenceMigration.migrateLegacyExerciseEvidenceIfNeeded(context: context)
             try? RequirementMigration.migrateLegacyRequirementsIfNeeded(context: context)
