@@ -18,6 +18,16 @@ obtain approval first. Implementation details may evolve when necessary,
 but product behavior must not drift merely because another approach is
 easier to code.
 
+## Repository workflow protocol
+
+Coding agents must read and follow `CODEX_WORKFLOW.md` for implementation,
+testing, auditing, migration verification, Git discipline, handoffs, phase
+locking, and context-efficient operation.
+
+`CODEX_WORKFLOW.md` defines **how repository work is performed**. It does not
+replace product, architecture, or training truth in `AGENTS.md`,
+`ARCHITECTURE.md`, or `SKILLS.md`.
+
 ## 1. Product vision
 
 CalisthenicsJourney is a personal iPhone training app that makes
@@ -206,21 +216,35 @@ presented as an **attempt**, even if storage reuses set-like records.
 Presentation language may vary by exercise semantics without requiring
 separate storage architecture.
 
-## 11. Previous → current loop
+## 11. Target / Previous / Actual loop
 
-During a workout, show the previous result and let the user enter
-today's result.
+During a workout, preserve three distinct concepts:
 
-If the app suggests a value that is too difficult and the user performs
-something else, the user records what actually happened. That result
-becomes the previous result next time.
+-   **Target** is today's prescription: what the athlete is being asked to
+    attempt. It is the primary training guidance.
+-   **Previous** is contextual historical reference: what the athlete actually
+    performed the relevant previous time. It remains useful continuity even
+    when it matches repeated targets, and becomes especially informative when
+    performance and prescription diverge. It should remain secondary to the
+    Target rather than compete with it.
+-   **Actual** is what the athlete performs now. It remains directly editable
+    throughout the active workout and becomes authoritative historical truth.
 
-**Reality overwrites the suggestion.**
+Target and Previous may help the athlete, but neither may overwrite Actual. If
+the prescription is too difficult and the athlete performs something else,
+record what actually happened; that result becomes the relevant Previous next
+time.
+
+This is a UX and data-semantics hierarchy, not a final visual design. Do not
+infer exact copy, layout, typography, colors, or styling from it. Preserve
+minimal interaction between real sets.
 
 ## 12. Progressive overload
 
-For rep-range strength work, the intended foundation is double
-progression.
+For supporting resistance or strength work explicitly prescribed with a
+rep-range model, the intended foundation is traditional double progression.
+Skill/progression movement work does not inherit double progression merely
+because it is measured in repetitions.
 
 The goal is gradual improvement, not maximal effort on every set. A first
 skill workout should calibrate a comfortable starting estimate with good
@@ -233,9 +257,10 @@ starting range** unless the exercise or training purpose calls for a
 different prescription. This is a default, not a universal rule.
 
 The user should choose a resistance that allows controlled reps without
-maximal effort. Future workouts should aim for gradual improvement within
-the prescribed range. V1 skill-movement prescriptions follow the
-calibration and deterministic three-set progression principles in `SKILLS.md`.
+maximal effort. Future rep-range supporting work should aim for gradual
+improvement within the prescribed range. V1 rep- and hold-based skill-movement
+prescriptions instead follow the approved calibration, normalization, and
+deterministic three-set progression principles in `SKILLS.md`.
 
 Example: Shoulder Press `3 × 8–12`.
 
@@ -250,6 +275,9 @@ upward again.
 Not every exercise should use `8–12`. Skill practice, isometric holds,
 controlled eccentrics, technique work, and other exercise types may use
 different progression methods appropriate to their purpose.
+
+Do not invent a prescription method for an exercise whose prescription
+semantics remain deferred.
 
 Training prescriptions answer **how to improve**; mastery requirements
 answer **what ability has been proven**. Normal workout results may
@@ -296,6 +324,12 @@ from selected skills, prescribe unavailable equipment, or invent a substitute
 unless an explicit approved alternative exists. A selected but temporarily
 untrainable skill keeps its history and priority while the next trainable skill
 fills the current focus.
+
+Equipment identity uses stable IDs rather than display names. An exercise
+variation may define alternative valid setups: alternatives use OR, while all
+items within one setup use AND. Explicit baseline-only availability is distinct
+from a missing or unknown mapping. Floor and an ordinary wall are baseline
+assumptions rather than selectable equipment.
 
 Generated workouts remain editable. The user should ultimately be able
 to add/remove/reorder/replace exercises, alter sets and ranges, and
@@ -429,17 +463,20 @@ unnecessary dialogs and confirmation steps.
 
 ## 21. Remaining training content is NOT finalized
 
-The V1 skill catalog, mastery trees, default exercise sequences, and
-training-prescription philosophy are approved in `SKILLS.md`, while the
-remaining training details and workout behavior are still under discussion.
+The V1 skill catalog, mastery trees, default exercise sequences,
+training-prescription philosophy, and the core workout-assembly hierarchy are
+approved in `SKILLS.md`. Only the identified edge cases and presentation details
+remain under discussion.
 
 Do not assume these prototype seed choices are final:
 
 -   additional exercise choices beyond the approved default sequences;
 -   exercise-specific rest, weekly frequency, and individual
     technique/control standards;
--   detailed multi-skill conflict/trimming behavior and coaching presentation;
--   workout-generation behavior.
+-   edge-case multi-skill conflict resolution and detailed trimming/tie-breaking
+    within the approved hierarchy;
+-   recovery/frequency integration; and
+-   richer coaching presentation and final generator UI.
 
 Before substantially expanding training content, discuss additions to the
 approved sequences, their prescriptions, objective form standards, and
@@ -530,23 +567,17 @@ it.
     must not be included unless they are required by the current
     implementation.
 
-## 25. Current development state
+## 25. Durable development state
 
-The project currently has a functioning SwiftUI/SwiftData prototype with
-local persistence, workout sessions, exercise/set logs,
-previous-vs-current results, metric-driven entry (reps, seconds,
-weight + reps), numeric keyboard dismissal, an initial Dashboard/Journey
-prototype, Skills, provisional level-requirement models, and a
-workout-history prototype.
+The repository contains an evolving SwiftUI/SwiftData implementation. Existing
+prototype behavior remains a foundation and is not automatically final product
+or information-architecture truth.
 
-The repository has an initial V1 Git checkpoint.
-
-The current prototype is a foundation, not the final information
-architecture.
-
-The next major design task is to finalize **remaining validation standards,
-weekly frequency, and edge-case workout-generation behavior** before
-broad editing interfaces or visual polish.
+Transient checkpoint status, completed phases, audit findings, and the
+recommended next task belong in the current `CODEX_HANDOFF.md`, not in this
+canonical product document. The current explicit task determines the active
+checkpoint; locked decisions in this file, `ARCHITECTURE.md`, and `SKILLS.md`
+remain authoritative across phases.
 
 ## 26. Product test
 

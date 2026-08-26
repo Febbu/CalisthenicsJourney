@@ -1543,26 +1543,20 @@ This is the primary reason the architecture must remain data-driven.
 
 ------------------------------------------------------------------------
 
-# 31. Recommended near-term implementation order
+# 31. Implementation checkpoint direction
 
-Before adding visual polish:
+This document preserves durable architecture direction, not a second current
+roadmap. The active implementation checkpoint and recommended next phase are
+determined by the current explicit task and `CODEX_HANDOFF.md`.
 
-1.  Finalize the deferred validation standards, weekly frequency, and
-    edge-case workout-generation behavior identified in `SKILLS.md`.
-2.  Remove the dedicated Progress tab from primary navigation.
-3.  Preserve workout history as a secondary destination.
-4.  Refine models so Skills/Stages can explicitly reference
-    requirements.
-5.  Implement `RequirementEvaluator`.
-6.  Implement generic progression handling.
-7.  Build ordered skill-goal selection and priority.
-8.  Implement simple skill-driven `WorkoutGenerator`.
-9.  Add workout editing/override.
-10. Add Skill/Stage/Requirement editing.
-11. Build/refine Dashboard late in V1 from real progression data.
-12. Only then consider richer visuals, animations, iCloud, widgets, etc.
+Completed locked phases must not be repeated merely because an older
+architectural sequence once listed them as future work. Later checkpoints must
+preserve the locked architecture and product invariants in `AGENTS.md`, this
+document, and `SKILLS.md` unless the project owner explicitly approves a change.
 
-This order may change with explicit project-owner approval.
+Continue to prioritize core mechanics, persistence, workout logging,
+skill-driven generation, editability, and clear UI before optional polish or
+services, but treat exact phase ordering as operational handoff state.
 
 ------------------------------------------------------------------------
 

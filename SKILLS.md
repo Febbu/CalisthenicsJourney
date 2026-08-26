@@ -10,9 +10,10 @@ It complements `AGENTS.md` and `ARCHITECTURE.md`.
 - `ARCHITECTURE.md` protects software structure and implementation boundaries.
 - `SKILLS.md` protects the approved V1 skill catalog, mastery trees, and training-content decisions.
 
-The V1 prescription philosophy is defined below. Its implementation details,
-remaining exercise-specific standards, frequency, and workout-generation
-behavior are still under discussion.
+The V1 prescription philosophy and core workout-assembly hierarchy are defined
+below. Remaining exercise-specific standards, frequency/recovery integration,
+edge-case conflict and trimming behavior within the approved hierarchy,
+coaching/presentation, and final generator UI are still under discussion.
 
 Do not silently redesign these skill trees. If a progression node or mastery standard appears to need changing, explain the proposed change to the project owner and obtain approval first.
 
@@ -128,7 +129,8 @@ Preparation blocks:
 - are separate from mastery progression;
 - should not consume the normal main-workout exercise budget in the same way as primary training exercises.
 
-Exact preparation exercises and generator behavior are still to be designed.
+Exact preparation exercises and the remaining preparation presentation and
+generation details are still to be designed within these approved constraints.
 
 ## 1.8 Mastery nodes may be dependent or independent
 
@@ -921,6 +923,14 @@ Recommended optional preparation:
 
 # 12. V1 training-prescription philosophy
 
+The calibration, normalization, and deterministic progression rules in this
+section apply to rep- and hold-based **skill/progression movement work**.
+Supporting resistance or strength exercises explicitly prescribed with a
+rep-range model may instead use traditional double progression such as 8–12.
+Do not apply double progression to a skill movement merely because it uses
+repetitions, and do not invent prescription behavior where this document leaves
+an exercise's semantics deferred.
+
 ## 12.1 The first workout is calibration
 
 The first workout for a selected skill is calibration rather than normal
@@ -1311,9 +1321,11 @@ benchmark to match underperformance.
 
 ## 12.8 Personal bests motivate; they do not prescribe
 
-The prescribed target represents what the athlete should train today. A shown
-previous or personal best is an optional challenge, not a requirement to set a
-new record every workout.
+The prescribed target represents what the athlete should train today. Previous
+actual performance is contextual continuity and remains secondary to the
+target; a shown personal best is an optional challenge, not a requirement to
+set a new record every workout. Neither Previous nor PB overwrites the Target or
+the athlete's editable Actual result.
 
 ```text
 Today's target:
@@ -1695,7 +1707,7 @@ after a relevant profile change instead of retaining an obsolete plan.
 
 # 15. Prescription and workout decisions still deferred
 
-Do not yet implement or finalize:
+This document does not yet finalize:
 
 - individual technique/control standards and confirmation UI;
 - edge-case multi-skill conflict resolution within the approved priority
@@ -1703,8 +1715,9 @@ Do not yet implement or finalize:
 - exercise-specific rest recommendations beyond the 90-second default;
 - weekly frequency;
 - richer coaching presentation and media;
-- application models or seed data;
-- workout-generator behavior or UI.
+- detailed generator trimming/tie-breaking and other edge cases not already
+  fixed by the approved priority hierarchy; and
+- final workout-generator UI.
 
 Calibration does not use a divide-by-two or other one-set conversion formula.
 Its variation and repeatable three-set target are confirmed directly after a
