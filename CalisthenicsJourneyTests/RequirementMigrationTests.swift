@@ -228,12 +228,13 @@ final class RequirementMigrationTests: XCTestCase {
 
         let genericRequirements = try context.fetch(FetchDescriptor<Requirement>())
         let legacyRequirements = try context.fetch(FetchDescriptor<LevelRequirement>())
-        let level = try XCTUnwrap(context.fetch(FetchDescriptor<JourneyLevel>()).first)
+        let levels = try context.fetch(FetchDescriptor<JourneyLevel>())
 
-        XCTAssertEqual(genericRequirements.count, 3)
+        XCTAssertFalse(genericRequirements.isEmpty)
         XCTAssertTrue(legacyRequirements.isEmpty)
-        XCTAssertEqual(level.genericRequirements.count, 3)
-        XCTAssertTrue(level.genericRequirements.allSatisfy(\.hasExactlyOneOwner))
+        XCTAssertTrue(levels.isEmpty)
+        XCTAssertTrue(genericRequirements.allSatisfy(\.hasExactlyOneOwner))
+        XCTAssertTrue(genericRequirements.allSatisfy { $0.skillStage != nil })
     }
 
     private func makeContainer() throws -> ModelContainer {
@@ -252,6 +253,15 @@ final class RequirementMigrationTests: XCTestCase {
             RequirementImplication.self,
             Skill.self,
             SkillStage.self,
+            EquipmentDefinition.self,
+            AthleteProfile.self,
+            EquipmentAvailability.self,
+            SkillGoal.self,
+            SkillStageConnection.self,
+            SkillExerciseLink.self,
+            VariationEquipmentMapping.self,
+            VariationEquipmentSetup.self,
+            VariationEquipmentItem.self,
             configurations: configuration
         )
     }

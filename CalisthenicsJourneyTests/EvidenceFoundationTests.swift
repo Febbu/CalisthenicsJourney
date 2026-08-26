@@ -4,26 +4,23 @@ import XCTest
 
 @MainActor
 final class EvidenceFoundationTests: XCTestCase {
-    func testFreshExercisesReceiveOneStableDefaultVariation() throws {
+    func testLegacyExercisesReceiveOneStableDefaultVariationDuringCanonicalInstallation() throws {
         let container = try makeContainer()
         let context = container.mainContext
+        let legacy = Exercise(name: "Legacy movement", metric: .reps)
+        context.insert(legacy)
+        try context.save()
 
-        try SeedData.installIfNeeded(context: context, existingExerciseCount: 0)
-        let exercises = try context.fetch(FetchDescriptor<Exercise>())
-        let firstIDs = Dictionary(uniqueKeysWithValues: exercises.map { exercise in
-            (exercise.id, exercise.variations.filter(\.isLegacyDefault).map(\.id))
-        })
+        try SeedData.installIfNeeded(context: context, existingExerciseCount: 1)
+        let firstIDs = legacy.variations.filter(\.isLegacyDefault).map(\.id)
 
         try EvidenceMigration.migrateLegacyExerciseEvidenceIfNeeded(context: context)
         try context.save()
 
-        XCTAssertFalse(exercises.isEmpty)
-        for exercise in exercises {
-            let defaults = exercise.variations.filter(\.isLegacyDefault)
-            XCTAssertEqual(defaults.count, 1)
-            XCTAssertEqual(defaults.map(\.id), firstIDs[exercise.id])
-            XCTAssertEqual(defaults[0].exercise?.id, exercise.id)
-        }
+        let defaults = legacy.variations.filter(\.isLegacyDefault)
+        XCTAssertEqual(defaults.count, 1)
+        XCTAssertEqual(defaults.map(\.id), firstIDs)
+        XCTAssertEqual(defaults[0].exercise?.id, legacy.id)
     }
 
     func testLegacyHistoryMigratesToOneStableDefaultVariationWithoutInventingEvidence() throws {
@@ -425,6 +422,15 @@ final class EvidenceFoundationTests: XCTestCase {
             RequirementImplication.self,
             Skill.self,
             SkillStage.self,
+            EquipmentDefinition.self,
+            AthleteProfile.self,
+            EquipmentAvailability.self,
+            SkillGoal.self,
+            SkillStageConnection.self,
+            SkillExerciseLink.self,
+            VariationEquipmentMapping.self,
+            VariationEquipmentSetup.self,
+            VariationEquipmentItem.self,
             configurations: configuration
         )
     }

@@ -44,7 +44,7 @@ enum EvidenceMigration {
             return variation
         }
 
-        for exercise in exercises {
+        for exercise in exercises where exercise.variations.isEmpty {
             _ = migratedDefaultVariation(for: exercise)
         }
 
@@ -60,8 +60,12 @@ enum EvidenceMigration {
                 exercise = recovered
             }
 
-            let variation = migratedDefaultVariation(for: exercise)
-            if log.variationID == nil {
+            let needsLogVariation = log.variationID == nil
+            let needsSetVariation = log.sets.contains { $0.variationID == nil }
+            let variation = (needsLogVariation || needsSetVariation)
+                ? migratedDefaultVariation(for: exercise)
+                : nil
+            if needsLogVariation, let variation {
                 log.variation = variation
                 log.variationID = variation.id
                 log.variationName = log.exerciseName
@@ -71,7 +75,7 @@ enum EvidenceMigration {
                 if set.metricRaw == nil {
                     set.metricRaw = log.metric.rawValue
                 }
-                if set.variationID == nil {
+                if set.variationID == nil, let variation {
                     set.variation = variation
                     set.variationID = variation.id
                     set.variationName = log.exerciseName
