@@ -575,10 +575,8 @@ belongs to optional preparation, not the mastery tree.
 Wall Walk
     ↓
 30s Chest-to-Wall Handstand
-    ↓
-Safe Handstand Bail
-    ↓
-Wall Handstand Balance
+    ├── Safe Handstand Bail (safety side branch)
+    └── Wall Handstand Balance
     ↓
 Controlled Handstand Kick-Up
     ↓
@@ -595,7 +593,10 @@ First Freestanding Handstand
 
 - Wall Walk remains the beginner entry node.
 - **30 seconds Chest-to-Wall Handstand** is the current wall-hold milestone.
-- Safe Handstand Bail remains a visible mastery node because safe exit/control is part of handstand competence.
+- Safe Handstand Bail is a real, visible, trainable, masterable safety side
+  branch from 30s Chest-to-Wall Handstand because safe exit/control is part of
+  handstand competence. It is not an inline prerequisite or progression gate
+  for the primary Handstand path.
 - Wall Handstand Balance remains a visible node.
 - Controlled Handstand Kick-Up remains a visible node.
 - First Freestanding Handstand is a meaningful achievement even before duration mastery.
@@ -610,12 +611,12 @@ First Freestanding Handstand
 - Chest-to-Wall Handstands
 - Wall Walks
 
-### 30s Chest-to-Wall Handstand → Safe Handstand Bail
+### Safety side branch from 30s Chest-to-Wall Handstand
 
 - Safe Bail practice
 - Chest-to-Wall Handstands
 
-### Safe Handstand Bail → Wall Handstand Balance
+### 30s Chest-to-Wall Handstand → Wall Handstand Balance
 
 - Wall Balance attempts
 - Chest-to-Wall Handstands
@@ -645,7 +646,9 @@ Recommended optional preparation:
 - wrists
 - shoulders
 
-Safe Handstand Bail remains an independent competency.
+Safe Handstand Bail remains an independent competency. Its mastery is derived
+from its own historical evidence, and failure to master it never blocks primary
+Handstand reachability, trainability, or full-skill completion.
 
 ---
 

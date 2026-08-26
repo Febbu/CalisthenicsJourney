@@ -143,12 +143,166 @@ struct SkillNodeState: Equatable {
     let isOnPrimaryPath: Bool
 }
 
+enum SkillTopologyValidationIssue: Equatable {
+    case stageOutsideSkill(stageID: UUID)
+    case invalidNodeKind(stageID: UUID)
+    case invalidPrerequisiteMode(stageID: UUID)
+    case missingRequirements(stageID: UUID)
+    case nonPrimaryCompletion(stageID: UUID)
+    case missingPrimaryCompletion
+    case danglingSource(connectionID: UUID, stageID: UUID)
+    case danglingDestination(connectionID: UUID, stageID: UUID)
+    case crossSkillConnection(connectionID: UUID)
+    case inconsistentSourceRelationship(connectionID: UUID)
+    case inconsistentDestinationRelationship(connectionID: UUID)
+    case selfConnection(connectionID: UUID, stageID: UUID)
+    case cycleDetected
+    case unknownIntendedRoot(stageID: UUID)
+    case unexpectedRoot(stageID: UUID)
+    case intendedRootHasIncoming(stageID: UUID)
+    case safetyGatesPrimary(connectionID: UUID)
+}
+
+struct SkillTopologyValidationResult: Equatable {
+    let issues: [SkillTopologyValidationIssue]
+
+    var isValid: Bool { issues.isEmpty }
+}
+
+enum SkillTopologyValidator {
+    static func validate(
+        skill: Skill,
+        allStages: [SkillStage],
+        connections: [SkillStageConnection],
+        intendedRootStageIDs: Set<UUID>? = nil
+    ) -> SkillTopologyValidationResult {
+        let skillStages = skill.stages.sorted { $0.id.uuidString < $1.id.uuidString }
+        let skillStageIDs = Set(skillStages.map(\.id))
+        let allStagesByID = allStages.reduce(into: [UUID: SkillStage]()) { result, stage in
+            result[stage.id] = result[stage.id] ?? stage
+        }
+        var issues: [SkillTopologyValidationIssue] = []
+
+        for stage in skillStages {
+            if stage.skill?.id != skill.id {
+                issues.append(.stageOutsideSkill(stageID: stage.id))
+            }
+            if stage.nodeKind == nil {
+                issues.append(.invalidNodeKind(stageID: stage.id))
+            }
+            if stage.prerequisiteMode == nil {
+                issues.append(.invalidPrerequisiteMode(stageID: stage.id))
+            }
+            if stage.requirements.isEmpty {
+                issues.append(.missingRequirements(stageID: stage.id))
+            }
+            if stage.isSkillCompletion && stage.nodeKind != .primary {
+                issues.append(.nonPrimaryCompletion(stageID: stage.id))
+            }
+        }
+        if !skillStages.contains(where: { $0.isSkillCompletion && $0.nodeKind == .primary }) {
+            issues.append(.missingPrimaryCompletion)
+        }
+
+        var validLocalConnections: [SkillStageConnection] = []
+        for connection in connections.sorted(by: { $0.id.uuidString < $1.id.uuidString }) {
+            let source = allStagesByID[connection.sourceStageID]
+            let destination = allStagesByID[connection.destinationStageID]
+            if source == nil {
+                issues.append(.danglingSource(
+                    connectionID: connection.id,
+                    stageID: connection.sourceStageID
+                ))
+            }
+            if destination == nil {
+                issues.append(.danglingDestination(
+                    connectionID: connection.id,
+                    stageID: connection.destinationStageID
+                ))
+            }
+            if let liveSource = connection.sourceStage,
+               liveSource.id != connection.sourceStageID {
+                issues.append(.inconsistentSourceRelationship(connectionID: connection.id))
+            }
+            if let liveDestination = connection.destinationStage,
+               liveDestination.id != connection.destinationStageID {
+                issues.append(.inconsistentDestinationRelationship(connectionID: connection.id))
+            }
+            guard let source, let destination else { continue }
+            guard source.skill?.id == skill.id,
+                  destination.skill?.id == skill.id,
+                  skillStageIDs.contains(source.id),
+                  skillStageIDs.contains(destination.id) else {
+                issues.append(.crossSkillConnection(connectionID: connection.id))
+                continue
+            }
+            guard source.id != destination.id else {
+                issues.append(.selfConnection(connectionID: connection.id, stageID: source.id))
+                continue
+            }
+            if source.nodeKind == .safety && destination.nodeKind == .primary {
+                issues.append(.safetyGatesPrimary(connectionID: connection.id))
+            }
+            validLocalConnections.append(connection)
+        }
+
+        if containsCycle(stageIDs: skillStageIDs, connections: validLocalConnections) {
+            issues.append(.cycleDetected)
+        }
+
+        if let intendedRootStageIDs {
+            for rootID in intendedRootStageIDs.sorted(by: uuidLessThan) where !skillStageIDs.contains(rootID) {
+                issues.append(.unknownIntendedRoot(stageID: rootID))
+            }
+            let destinationIDs = Set(validLocalConnections.map(\.destinationStageID))
+            let actualRootIDs = skillStageIDs.subtracting(destinationIDs)
+            for rootID in actualRootIDs.subtracting(intendedRootStageIDs).sorted(by: uuidLessThan) {
+                issues.append(.unexpectedRoot(stageID: rootID))
+            }
+            for rootID in intendedRootStageIDs.intersection(destinationIDs).sorted(by: uuidLessThan) {
+                issues.append(.intendedRootHasIncoming(stageID: rootID))
+            }
+        }
+
+        return SkillTopologyValidationResult(issues: issues)
+    }
+
+    private static func containsCycle(
+        stageIDs: Set<UUID>,
+        connections: [SkillStageConnection]
+    ) -> Bool {
+        let adjacency = Dictionary(grouping: connections, by: \.sourceStageID)
+            .mapValues { $0.map(\.destinationStageID).sorted(by: uuidLessThan) }
+        var visiting = Set<UUID>()
+        var visited = Set<UUID>()
+
+        func visit(_ stageID: UUID) -> Bool {
+            if visiting.contains(stageID) { return true }
+            if visited.contains(stageID) { return false }
+            visiting.insert(stageID)
+            for destinationID in adjacency[stageID] ?? [] where visit(destinationID) {
+                return true
+            }
+            visiting.remove(stageID)
+            visited.insert(stageID)
+            return false
+        }
+
+        return stageIDs.sorted(by: uuidLessThan).contains(where: visit)
+    }
+
+    nonisolated private static func uuidLessThan(_ lhs: UUID, _ rhs: UUID) -> Bool {
+        lhs.uuidString < rhs.uuidString
+    }
+}
+
 enum ExerciseAvailabilityResolver {
     static func resolve(
         variationID: UUID,
         mappings: [VariationEquipmentMapping],
         availableEquipmentIDs: Set<UUID>
     ) -> ExerciseAvailability {
+        let canonicalEquipmentIDs = Set(EquipmentCatalog.items.map(\.id))
         let matching = mappings.filter { $0.variationID == variationID }
         guard matching.count == 1, let mapping = matching.first else { return .unknown }
         guard let kind = mapping.kind else { return .unknown }
@@ -158,16 +312,25 @@ enum ExerciseAvailabilityResolver {
             return mapping.setups.isEmpty ? .available : .unknown
         case .configured:
             guard !mapping.setups.isEmpty else { return .unknown }
-            var sawValidSetup = false
+            var sawKnownValidSetup = false
+            var sawUnresolvedSetup = false
             for setup in mapping.setups {
                 let equipmentIDs = setup.items.map(\.equipmentID)
-                guard !equipmentIDs.isEmpty else { continue }
-                sawValidSetup = true
-                if Set(equipmentIDs).isSubset(of: availableEquipmentIDs) {
+                guard !equipmentIDs.isEmpty else {
+                    sawUnresolvedSetup = true
+                    continue
+                }
+                guard equipmentIDs.allSatisfy(canonicalEquipmentIDs.contains) else {
+                    sawUnresolvedSetup = true
+                    continue
+                }
+                sawKnownValidSetup = true
+                if Set(equipmentIDs).isSubset(of: availableEquipmentIDs.intersection(canonicalEquipmentIDs)) {
                     return .available
                 }
             }
-            return sawValidSetup ? .unavailable : .unknown
+            if sawUnresolvedSetup { return .unknown }
+            return sawKnownValidSetup ? .unavailable : .unknown
         }
     }
 

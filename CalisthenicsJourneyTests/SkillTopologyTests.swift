@@ -37,6 +37,153 @@ final class SkillTopologyTests: XCTestCase {
         XCTAssertTrue(states[c.id]?.isReachable == true)
     }
 
+    func testHistoricallyMasteredUnreachableSourceUnlocksItsDescendant() {
+        let skill = Skill(name: "Evidence First", emoji: "")
+        let a = stage("A", 0, skill)
+        let b = stage("B", 1, skill)
+        let c = stage("C", 2, skill, isCompletion: true)
+        skill.stages = [a, b, c]
+        _ = requirementVariation(for: a)
+        let bVariation = requirementVariation(for: b)
+        _ = requirementVariation(for: c)
+        let connections = [
+            SkillStageConnection(source: a, destination: b),
+            SkillStageConnection(source: b, destination: c)
+        ]
+
+        let states = statesByID(skill, [session(bVariation)], connections)
+
+        XCTAssertTrue(states[b.id]?.isMastered == true)
+        XCTAssertFalse(states[b.id]?.isReachable == true)
+        XCTAssertTrue(states[c.id]?.isReachable == true)
+    }
+
+    func testTopologyValidatorAcceptsNonblockingSafetySideBranch() {
+        let skill = Skill(name: "Handstand Shape", emoji: "")
+        let wallHold = stage("Wall Hold", 0, skill)
+        let balance = stage("Wall Balance", 1, skill)
+        let completion = stage("Completion", 2, skill, isCompletion: true)
+        let safeBail = stage("Safe Bail", 3, skill, kind: .safety)
+        skill.stages = [wallHold, balance, completion, safeBail]
+        [wallHold, balance, completion, safeBail].forEach { _ = requirementVariation(for: $0) }
+        let connections = [
+            SkillStageConnection(source: wallHold, destination: balance),
+            SkillStageConnection(source: balance, destination: completion),
+            SkillStageConnection(source: wallHold, destination: safeBail)
+        ]
+
+        let result = SkillTopologyValidator.validate(
+            skill: skill,
+            allStages: skill.stages,
+            connections: connections,
+            intendedRootStageIDs: [wallHold.id]
+        )
+
+        XCTAssertTrue(result.isValid, "Unexpected issues: \(result.issues)")
+    }
+
+    func testTopologyValidatorRejectsDanglingCrossSkillAndInconsistentEndpoints() {
+        let skill = Skill(name: "Local", emoji: "")
+        let root = stage("Root", 0, skill)
+        let completion = stage("Completion", 1, skill, isCompletion: true)
+        skill.stages = [root, completion]
+        [root, completion].forEach { _ = requirementVariation(for: $0) }
+        let otherSkill = Skill(name: "Other", emoji: "")
+        let other = stage("Other", 0, otherSkill, isCompletion: true)
+        otherSkill.stages = [other]
+        _ = requirementVariation(for: other)
+
+        let dangling = SkillStageConnection(source: root, destination: completion)
+        dangling.destinationStageID = UUID()
+        let danglingSource = SkillStageConnection(source: root, destination: completion)
+        danglingSource.sourceStageID = UUID()
+        let crossSkill = SkillStageConnection(source: root, destination: other)
+        let inconsistent = SkillStageConnection(source: root, destination: completion)
+        inconsistent.sourceStageID = completion.id
+
+        let result = SkillTopologyValidator.validate(
+            skill: skill,
+            allStages: [root, completion, other],
+            connections: [dangling, danglingSource, crossSkill, inconsistent],
+            intendedRootStageIDs: [root.id]
+        )
+
+        XCTAssertTrue(result.issues.contains(.danglingDestination(
+            connectionID: dangling.id,
+            stageID: dangling.destinationStageID
+        )))
+        XCTAssertTrue(result.issues.contains(.danglingSource(
+            connectionID: danglingSource.id,
+            stageID: danglingSource.sourceStageID
+        )))
+        XCTAssertTrue(result.issues.contains(.crossSkillConnection(connectionID: crossSkill.id)))
+        XCTAssertTrue(result.issues.contains(.inconsistentSourceRelationship(
+            connectionID: inconsistent.id
+        )))
+    }
+
+    func testTopologyValidatorRejectsCyclesSelfEdgesAndUnintendedRoots() {
+        let skill = Skill(name: "Malformed Graph", emoji: "")
+        let a = stage("A", 0, skill)
+        let b = stage("B", 1, skill)
+        let c = stage("C", 2, skill, isCompletion: true)
+        let orphan = stage("Orphan", 3, skill)
+        skill.stages = [a, b, c, orphan]
+        [a, b, c, orphan].forEach { _ = requirementVariation(for: $0) }
+        let selfEdge = SkillStageConnection(source: orphan, destination: orphan)
+        let connections = [
+            SkillStageConnection(source: a, destination: b),
+            SkillStageConnection(source: b, destination: c),
+            SkillStageConnection(source: c, destination: a),
+            selfEdge
+        ]
+
+        let result = SkillTopologyValidator.validate(
+            skill: skill,
+            allStages: skill.stages,
+            connections: connections,
+            intendedRootStageIDs: [a.id]
+        )
+
+        XCTAssertTrue(result.issues.contains(.cycleDetected))
+        XCTAssertTrue(result.issues.contains(.selfConnection(
+            connectionID: selfEdge.id,
+            stageID: orphan.id
+        )))
+        XCTAssertTrue(result.issues.contains(.unexpectedRoot(stageID: orphan.id)))
+        XCTAssertTrue(result.issues.contains(.intendedRootHasIncoming(stageID: a.id)))
+    }
+
+    func testTopologyValidatorRejectsInvalidNodeSemanticsAndSafetyGating() {
+        let skill = Skill(name: "Invalid Nodes", emoji: "")
+        let root = stage("Root", 0, skill)
+        let safety = stage("Safety", 1, skill, kind: .safety, isCompletion: true)
+        let primary = stage("Primary", 2, skill)
+        skill.stages = [root, safety, primary]
+        _ = requirementVariation(for: root)
+        _ = requirementVariation(for: safety)
+        root.nodeKindRaw = "not-a-kind"
+        root.prerequisiteModeRaw = "not-a-mode"
+        let safetyGate = SkillStageConnection(source: safety, destination: primary)
+
+        let result = SkillTopologyValidator.validate(
+            skill: skill,
+            allStages: skill.stages,
+            connections: [
+                SkillStageConnection(source: root, destination: safety),
+                safetyGate
+            ],
+            intendedRootStageIDs: [root.id]
+        )
+
+        XCTAssertTrue(result.issues.contains(.invalidNodeKind(stageID: root.id)))
+        XCTAssertTrue(result.issues.contains(.invalidPrerequisiteMode(stageID: root.id)))
+        XCTAssertTrue(result.issues.contains(.missingRequirements(stageID: primary.id)))
+        XCTAssertTrue(result.issues.contains(.nonPrimaryCompletion(stageID: safety.id)))
+        XCTAssertTrue(result.issues.contains(.missingPrimaryCompletion))
+        XCTAssertTrue(result.issues.contains(.safetyGatesPrimary(connectionID: safetyGate.id)))
+    }
+
     func testBranchAndExplicitAllOrAnyConvergence() {
         let skill = Skill(name: "Graph", emoji: "")
         let a = stage("A", 0, skill)
@@ -308,6 +455,62 @@ final class SkillTopologyTests: XCTestCase {
                 profile: fetchedProfile
             ),
             .available
+        )
+    }
+
+    func testUnknownEquipmentIdentityFailsClosedEvenWhenProfileClaimsItIsAvailable() throws {
+        let container = try makeContainer()
+        let context = ModelContext(container)
+        let profile = AthleteProfile()
+        let unknownDefinition = EquipmentDefinition(
+            id: UUID(),
+            kind: .pullUpBar,
+            displayName: "Malformed duplicate identity"
+        )
+        let availability = EquipmentAvailability(
+            equipment: unknownDefinition,
+            isAvailable: true,
+            profile: profile
+        )
+        profile.equipmentAvailability = [availability]
+        let direct = movement(metric: .reps)
+        let unknownMapping = mapping(direct.variation, [[unknownDefinition]], context)
+
+        XCTAssertEqual(
+            ExerciseAvailabilityResolver.resolve(
+                variationID: direct.variation.id,
+                mappings: [unknownMapping],
+                profile: profile
+            ),
+            .unknown
+        )
+    }
+
+    func testEquipmentResolutionPrefersKnownAvailableRouteThenFailsClosedForUnresolvedAlternatives() throws {
+        let container = try makeContainer()
+        let context = ModelContext(container)
+        try AthleteProfileBootstrap.installIfNeeded(context: context)
+        let definitions = try context.fetch(FetchDescriptor<EquipmentDefinition>())
+        let canonicalBar = definition(.pullUpBar, definitions)
+        let unknownDefinition = EquipmentDefinition(
+            id: UUID(),
+            kind: .pullUpBar,
+            displayName: "Unknown"
+        )
+        let direct = movement(metric: .reps)
+        let configured = mapping(
+            direct.variation,
+            [[canonicalBar], [unknownDefinition], []],
+            context
+        )
+
+        XCTAssertEqual(resolve(direct.variation, [configured], []), .unknown)
+        XCTAssertEqual(resolve(direct.variation, [configured], [.pullUpBar]), .available)
+
+        let duplicate = VariationEquipmentMapping(variation: direct.variation, kind: .baselineOnly)
+        XCTAssertEqual(
+            resolve(direct.variation, [configured, duplicate], [.pullUpBar]),
+            .unknown
         )
     }
 
