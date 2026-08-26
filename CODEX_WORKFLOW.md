@@ -96,6 +96,45 @@ For new semantics or corrected bugs:
 
 A passing test suite is evidence, not proof.
 
+### 5.1 Test-execution efficiency
+
+During implementation, run the smallest relevant focused test set needed for
+fast feedback. Do not rerun the entire regression suite after every edit. Reuse
+existing build and test artifacts when safe, and avoid unnecessary clean
+builds, rebuilds, simulator resets, or repeated full-suite runs.
+
+When checkpoint implementation is complete, run the full regression suite
+once. If it fails:
+
+1. inspect the failing tests;
+2. fix the issue;
+3. rerun only the affected or failing tests first; and
+4. after they pass, rerun the full regression suite before declaring the
+   checkpoint complete.
+
+For domain or persistence checkpoints, final verification is:
+
+```text
+focused tests during implementation
+→ full regression suite once at implementation-complete
+→ standalone build once
+→ final diff and working-tree inspection
+```
+
+Keep successful test and build output concise in agent context. Store verbose
+logs and result bundles outside conversational context, such as under `/tmp`,
+and inspect detailed output only when a failure requires it.
+
+Never delete, disable, skip, weaken, or consolidate meaningful regression tests
+merely to reduce usage, runtime, or context. Focused testing is an execution
+optimization, not a reduction in test coverage. Reuse migration fixtures and
+other expensive regression fixtures once created; regenerate them only when
+the schema checkpoint changes and regeneration is required.
+
+Do not perform another exhaustive phase re-audit as part of a bounded
+correction unless the correction changes foundational architecture or reveals
+new systemic uncertainty.
+
 ## 6. SwiftData and migration
 
 When persistence models change:
