@@ -29,7 +29,8 @@ struct CalisthenicsJourneyApp: App {
             SkillExerciseLink.self,
             VariationEquipmentMapping.self,
             VariationEquipmentSetup.self,
-            VariationEquipmentItem.self
+            VariationEquipmentItem.self,
+            ExercisePrescriptionState.self
         ])
     }
 }

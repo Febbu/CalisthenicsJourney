@@ -154,6 +154,7 @@ final class Phase31ToPhase4MigrationTests: XCTestCase {
             EquipmentAvailability.self, SkillGoal.self, SkillStageConnection.self,
             SkillExerciseLink.self, VariationEquipmentMapping.self,
             VariationEquipmentSetup.self, VariationEquipmentItem.self,
+            ExercisePrescriptionState.self,
             configurations: ModelConfiguration(url: storeURL)
         )
     }
