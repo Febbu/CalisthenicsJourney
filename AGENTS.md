@@ -246,11 +246,35 @@ rep-range model, the intended foundation is traditional double progression.
 Skill/progression movement work does not inherit double progression merely
 because it is measured in repetitions.
 
-The goal is gradual improvement, not maximal effort on every set. A first
-skill workout should calibrate a comfortable starting estimate with good
-form and capacity remaining. Subsequent normal multi-set performance,
-especially the first normal workout, establishes practical training
-capacity as defined in `SKILLS.md`.
+The goal is gradual improvement, not maximal effort on every set. Calibration
+is lightweight, encouraging, and non-evaluative: it provides a reasonable
+starting point when an exact exercise variation lacks usable prescription
+information, and actual training teaches the app what the athlete can really
+do. It is not a test and has no pass/fail outcome. The athlete is not expected
+to know their exact capacity in advance.
+
+Keep calibration, evidence, mastery, and prescription distinct:
+
+```text
+Self-report / estimate
+→ prescription input only
+
+Actual performed workout effort
+→ historical evidence
+
+Historical evidence
+→ may satisfy mastery Requirements
+
+Prescription state
+→ informs what should be attempted next
+```
+
+A selected variation or estimated capacity must never create performed
+evidence, mastery, a personal best, or workout history. Existing real
+performance is more authoritative for prescription than self-report when it is
+usable, while prescription staleness never erases historical truth or earned
+mastery. Exact variation capacity must not be transferred numerically to a
+different variation.
 
 For typical supporting strength exercises, **8–12 reps is the default
 starting range** unless the exercise or training purpose calls for a
@@ -287,6 +311,16 @@ become constant max-effort tests.
 The app may recommend progression later, but recommendations never
 override actual logged performance. Introductory guidance should be
 contextual and concise rather than repeatedly interrupting every workout.
+
+The app should remain encouraging, supportive, nonjudgmental, and truthful.
+Uncertainty is something the athlete and app resolve together, not an athlete
+mistake: an estimate that proves too high or low improves the next
+prescription, a missed target informs adaptation rather than punishment, and a
+return after a long break invites recalibration without erasing achievement.
+Conceptually, the product says, **“We’ll figure out your starting point
+together.”** This is a durable voice and behavior principle, not locked final
+copy, layout, typography, or visual design. Gentle presentation must not weaken
+objective evidence or mastery semantics.
 
 ## 13. Workout generation and control
 

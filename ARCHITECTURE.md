@@ -290,10 +290,25 @@ athlete must view or complete.
 
 An Exercise does not know which SwiftUI screen renders it.
 
-Numeric prescription state belongs to the athlete and a stable exercise
-variation identity, not to each Skill that happens to request that exercise.
-Multiple Skills may reference the same prescription state without duplicating
-it.
+Prescription state belongs to the athlete and a stable exercise-variation
+identity, not to each Skill that happens to request that exercise. Multiple
+Skills may reference the same prescription state without duplicating it, but
+numeric capacity must never be translated from one `ExerciseVariation` to
+another.
+
+The prescription architecture must support at least rep-based,
+hold/duration-based, and attempt-oriented modes. Attempt-oriented prescription
+must represent planned attempts and actual successful/unsuccessful outcomes
+without inventing fake reps or seconds. Detailed success, form, control,
+duration, and attempt-count standards remain content decisions rather than
+prescription-state assumptions.
+
+Calibration input is prescription metadata, never performed evidence. A
+self-selected variation or optional three-set estimate must not create
+`SetLog`, workout history, a personal best, or mastery. A no-estimate state must
+be representable without fabricating numeric targets so the first encounter can
+remain exploratory. Actual eligible same-variation performance supersedes
+self-report as the basis for later adaptation.
 
 ------------------------------------------------------------------------
 
@@ -890,13 +905,20 @@ protected; the athlete may still manually change variation between sets. If no
 performance has been logged anywhere, regenerate the whole plan from the live
 profile.
 
-Starting prescription state for an unlocked variation must be variation-local:
-restore usable state for that exact variation, otherwise use sufficient prior
-same-variation workload evidence, otherwise request lightweight calibration.
-Capability evidence such as one successful set may prove mastery without being
-sufficient to initialize repeatable three-set workload. Never translate numeric
-prescriptions from another variation or recalibrate established state merely
-because time elapsed.
+Starting prescription state for a relevant variation must be variation-local:
+use sufficiently current usable state or real workload evidence for that exact
+variation; otherwise request lightweight just-in-time calibration. Calibration
+may store an optional three-working-set estimate or an explicit exploratory
+state with no normal numeric target. Capability evidence such as one successful
+set may prove mastery without being sufficient or current enough to initialize
+repeatable three-set workload.
+
+Prescription freshness is separate from mastery and historical evidence. V1
+uses approximately six months without relevant exact-variation performance as
+the current staleness policy; represent that duration as changeable policy, not
+schema shape. Staleness may prompt recalibration, but it must never delete or
+rewrite workout history, remove personal bests, revoke mastery, or translate
+capacity from another variation.
 
 ------------------------------------------------------------------------
 

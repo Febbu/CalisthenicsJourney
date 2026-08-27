@@ -934,114 +934,74 @@ Do not apply double progression to a skill movement merely because it uses
 repetitions, and do not invent prescription behavior where this document leaves
 an exercise's semantics deferred.
 
-## 12.1 The first workout is calibration
+## 12.1 Calibration is just-in-time and non-evaluative
 
-The first workout for a selected skill is calibration rather than normal
-training. Its purpose is to establish a comfortable, user-controlled starting
-estimate quickly, without exhausting the athlete, testing their absolute
-maximum, or requiring three full sets for every selected skill.
+V1 does not require broad up-front calibration of every selected Skill or
+exercise. Calibration occurs when an exact `ExerciseVariation` becomes relevant
+for prescription and the athlete lacks sufficiently current usable
+same-variation prescription state or real performance history. Capacity does
+not transfer numerically between variations; a newly relevant harder variation
+needs its own basis unless useful real performance for that exact variation
+already supplies one.
 
-### Choose the variation
+Calibration is a lightweight starting conversation, not a test. It has no
+pass/fail outcome, and the athlete is not expected to know an exact capacity
+before training. The intended product mentality is collaborative—conceptually,
+**“We’ll figure out your starting point together”**—without locking final copy
+or presentation.
 
-For each selected skill, the athlete first chooses the progression or movement
-variation they believe currently fits their ability:
+### Choose a comfortable starting variation
 
-```text
-Push-up variation:
-[ Strict Push-up ▾ ]
-```
+When the app does not know where the athlete should begin within a progression,
+prefer asking which relevant variation feels like a comfortable place to try:
 
-This choice is an initial estimate. Selecting a harder variation is not mastery
-evidence by itself; actual demonstrated performance remains the meaningful
-evidence.
+> What feels like a good place to start?
 
-If the athlete does not know which variation fits, calibration must also offer
-a conceptual **Not sure / Start me from the beginning** path. The app may then
-choose the safe beginning of the relevant progression. This fallback remains an
-estimate and does not award mastery merely because it was selected.
+The athlete may choose a variation they feel comfortable attempting for three
+working sets. For rep-based work, expecting approximately one rep per working
+set is a legitimate selected starting point. A conceptual **Not sure / Start me
+from the beginning** path may choose the safe beginning of the relevant
+progression.
 
-### Choose a comfortable repeatable target
+Variation selection is self-report only. It creates no performed evidence,
+mastery, personal best, or workout history and does not prove that the athlete
+can perform the variation.
 
-Instead of asking how many repetitions or seconds the athlete can achieve at
-maximum, calibration should conceptually ask:
+### Optionally estimate three working sets
 
-> How many could you comfortably repeat for 3 sets?
-
-For hold-based movements:
-
-> How long could you comfortably repeat for 3 sets?
-
-The athlete chooses a conservative target they believe is repeatable with clean
-form, manageable fatigue, and some capacity remaining. The target may include:
-
-- repetitions for rep-based movements;
-- seconds for hold-based movements;
-- left/right targets where applicable;
-- appropriate attempt or quality information for technique/control movements
-  once that design is finalized.
-
-This direct repeatable-three-set estimate replaces the need for a mathematical
-calibration formula. In particular, do not introduce a "comfortable result ÷ 2"
-rule.
-
-### Try one calibration set
-
-The athlete performs one set at the selected variation and target as a quick
-reality check and records what they actually performed. This is not a full
-three-set workout or a maximum-effort test.
+After choosing a variation, the athlete may optionally estimate approximate
+capacity across all three working sets. The values may differ and need not be
+exact:
 
 ```text
-Selected:
-Strict Push-up
-5 reps × 3 sets
-
-Calibration check:
-Try 5 reps once.
+Rep estimate:  5 / 4 / 3
+Hold estimate: 12s / 10s / 8s
 ```
 
-The recorded calibration performance is real historical evidence. If it
-successfully satisfies an approved mastery requirement, it may validate that
-requirement exactly as the same performance would elsewhere.
+The estimate initializes or informs prescription state only. It must never
+satisfy a Requirement, award mastery, create a personal best, appear as
+completed workout history, or be stored as `SetLog`/performed effort. Existing
+sufficiently current useful real performance for the exact variation is more
+authoritative and should prevent an unnecessary estimate prompt.
 
-### Adjust before confirmation
-
-After the calibration set, the athlete may adjust the selected variation,
-repeatable rep or hold target, and side-specific targets before confirming.
-
-```text
-How did that feel?
-
-Variation:
-[ Strict Push-up ▾ ]
-
-Repeatable target:
-[ 5 reps ]
-
-[ Confirm starting level ]
-```
-
-Exact UI wording and controls remain open. The required behavior is that the
-estimate stays adjustable before confirmation.
-
-### Confirm the starting estimate
-
-Once satisfied, the athlete confirms the estimated starting prescription and
-moves to the next selected skill:
-
-```text
-Strict Push-up
-Estimated starting prescription:
-3 × 5
-```
-
-Repeat this lightweight process for each selected skill. The confirmed result
-is an estimate, not proven multi-set working capacity.
+The athlete may skip the estimate. In that case, do not fabricate a numeric or
+duration target merely to make the prescription look complete. The first
+encounter may instead use an **exploratory** state with no normal numeric
+target. Rep-based exploratory work guides three controlled working sets while
+stopping at approximately 1–2 reps in reserve. Hold- and attempt-oriented work
+requires metric-appropriate controlled/submaximal guidance; do not apply the
+rep-specific RIR cue literally. Exact coaching copy for those metrics remains
+deferred.
 
 ## 12.2 Normal workouts establish working capacity
 
-After calibration, normal workouts use actual multi-set performance to learn
-the athlete's working capacity. The first normal workout is especially useful
-as the strengthening and training baseline.
+The first actual eligible workout after a self-reported estimate or exploratory
+start anchors working capacity and is authoritative for subsequent adaptation.
+If the estimate was too high or too low, the app learned a better starting
+point; this is not athlete failure. Use real performance to correct the
+prescription rather than forcing slow movement from a clearly inaccurate
+estimate. The approved normal adaptation rules apply without inventing a
+special large-underestimate or large-overestimate formula here.
 
 For example, a calibration estimate of `Strict Push-up — 3 × 5` may produce any
 of these first normal-workout results:
@@ -1058,8 +1018,8 @@ of these first normal-workout results:
 7 / 6 / 5
 ```
 
-This real three-set performance is stronger evidence for future adaptation than
-the starting estimate.
+This real three-set performance supersedes the starting estimate as evidence of
+working capacity.
 
 Evaluate the full workout rather than only the best single set:
 
@@ -1077,8 +1037,8 @@ best set of 4 alone.
 Preserve the lifecycle distinction:
 
 ```text
-Calibration
-→ user-controlled starting estimate
+Just-in-time calibration
+→ variation selection plus optional estimate, or exploratory state
 
 First normal workout
 → first strong evidence of repeatable working capacity
@@ -1090,7 +1050,10 @@ Later workouts
 ## 12.3 Three predictable sets are the V1 default
 
 For normal rep- and hold-based strength work, **3 sets are the default
-prescription structure**. Calibration begins with equal estimated targets:
+prescription structure**. A provided calibration estimate may contain three
+distinct approximate values, such as `5 / 4 / 3`; an exploratory state may have
+no numeric target. Once a normal numeric prescription is established, targets
+may begin equal or become slightly uneven through deterministic progression:
 
 ```text
 5 / 5 / 5
@@ -1255,8 +1218,9 @@ adaptation requires three completed sets on the same variation.
 
 ## 12.6 Failed, skipped, and partial exercises
 
-A failed complete exercise does not automatically regress the athlete. Repeat
-the same prescription for that exercise at the next relevant workout:
+After actual performance has established a normal prescription, a later failed
+complete exercise does not automatically regress the athlete. Repeat the same
+prescription for that exercise at the next relevant workout:
 
 ```text
 Target:
@@ -1269,8 +1233,11 @@ Next workout:
 7 / 6 / 6 again
 ```
 
-Do not normalize a failed result downward or automatically regress the
-prescription.
+Do not normalize that later failed result downward or automatically regress the
+established prescription. The first eligible real performance after calibration
+is different: section 12.2 makes it the initial authoritative capacity anchor,
+whether the estimate proved too high or too low, while leaving the exact
+large-error adaptation formula for the implementation checkpoint.
 
 Already-earned mastery is never removed by an incomplete workout.
 
@@ -1357,6 +1324,12 @@ Some technique, control, coordination, or safety competencies do not fit normal
 rep or hold prescriptions. Examples may include Safe Handstand Bail,
 Handstand Kick-Up, transitions, and other competencies whose meaningful
 evidence is successful execution.
+
+Attempt-oriented work is a first-class prescription mode alongside reps and
+holds. It must support planned attempts and actual successful/unsuccessful
+outcomes without converting them into fake repetitions or seconds. Do not
+invent detailed success, form, control, duration, or attempt-count standards
+for the successful-attempt Requirements whose standards remain deferred.
 
 For V1, these use **successful-attempt confirmation**:
 
@@ -1612,17 +1585,23 @@ complete the surrounding three-set prescription. Current failure, choosing an
 easier variation, or repeated bad workouts never removes earned mastery or
 automatically forces a lower variation.
 
-Do not implement elapsed-time detraining or prescription decay in V1. When an
-exercise returns after weeks or months, use its last known variation and
-prescription. Actual performance and manual athlete choices correct stale data.
+Do not implement elapsed-time detraining, erase capacity history, or regress
+mastery because time passed. Prescription confidence may nevertheless become
+stale: approximately **six months without relevant performance for the exact
+variation** is the current V1 recalibration threshold. Keep that duration a
+changeable policy rather than schema shape. After that interval, the app may ask
+where the athlete feels comfortable starting again; old workouts, PBs,
+evidence, and mastery remain untouched.
 
-When progression unlocks a variation, establish its starting prescription from
+When a variation becomes relevant, establish its starting prescription from
 real information in this order:
 
-1. restore usable stored prescription state for that exact variation;
-2. otherwise use sufficient prior performance evidence for that exact variation
-   when it genuinely establishes a repeatable starting workload; or
-3. otherwise use the existing lightweight calibration flow.
+1. use sufficiently current usable stored prescription state for that exact
+   variation;
+2. otherwise use sufficiently current prior performance for that exact
+   variation when it genuinely establishes a repeatable starting workload; or
+3. otherwise use the just-in-time lightweight calibration flow, including its
+   optional-estimate and exploratory paths.
 
 Never start arbitrarily at 1 or translate repetitions/seconds from another
 variation. A single prior set on the new variation may prove capability or
@@ -1630,9 +1609,9 @@ mastery without being sufficient to initialize a three-set prescription. Do not
 invent a rigid sufficiency formula; use calibration when exact-variation
 history does not establish usable repeatable workload.
 
-Returning to a previously trained variation restores its stored prescription
-without recalibration merely because time passed. Subsequent reality corrects
-stale state through the existing rules.
+Returning before the staleness threshold may restore usable exact-variation
+state. Returning after it may invite recalibration, while the first actual
+eligible performance again becomes authoritative for later adaptation.
 
 ## 14.4 Mastery evidence and active-session stability
 
@@ -1723,8 +1702,10 @@ This document does not yet finalize:
 - final workout-generator UI.
 
 Calibration does not use a divide-by-two or other one-set conversion formula.
-Its variation and repeatable three-set target are confirmed directly after a
-single adjustable reality-check set.
+It uses just-in-time starting-variation selection with an optional three-set
+estimate; skipping the estimate produces an exploratory state rather than a
+fabricated target. Only actual performed effort becomes evidence or workout
+history.
 
 Additional exercise choices require approval rather than being inferred from
 this document. Do not hardcode the current trees, sequences, or prescriptions as
