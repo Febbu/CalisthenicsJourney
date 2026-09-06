@@ -74,6 +74,13 @@ final class ExercisePrescriptionState {
     func isUsable(for requestedMode: PrescriptionMode) -> Bool {
         guard mode == requestedMode, let basisKind else { return false }
 
+        switch basisKind {
+        case .realPerformance:
+            guard lastRelevantPerformanceAt != nil else { return false }
+        case .estimate, .exploratory:
+            guard lastRelevantPerformanceAt == nil else { return false }
+        }
+
         switch (requestedMode, basisKind) {
         case (.attempts, .exploratory), (.attempts, .realPerformance):
             return numericWorkingSetValuesAreAbsent
@@ -131,6 +138,15 @@ final class ExercisePrescriptionState {
 
     static func makeOwnershipKey(athleteID: UUID, variationID: UUID) -> String {
         "\(athleteID.uuidString)|\(variationID.uuidString)"
+    }
+
+    func hasValidOwnership(athleteID: UUID, variationID: UUID) -> Bool {
+        self.athleteID == athleteID
+            && self.variationID == variationID
+            && ownershipKey == Self.makeOwnershipKey(
+                athleteID: athleteID,
+                variationID: variationID
+            )
     }
 }
 
@@ -273,6 +289,14 @@ enum PrescriptionStateService {
         guard values.all.allSatisfy({ $0 > 0 }) else {
             throw PrescriptionStateError.numericEstimateRequired
         }
+        if let anchored = try authoritativeRealPerformanceState(
+            athleteID: athleteID,
+            variationID: variationID,
+            context: context,
+            asOf: now
+        ) {
+            return anchored
+        }
         return try upsert(
             athleteID: athleteID,
             variationID: variationID,
@@ -293,7 +317,15 @@ enum PrescriptionStateService {
         context: ModelContext,
         now: Date = .now
     ) throws -> ExercisePrescriptionState {
-        try upsert(
+        if let anchored = try authoritativeRealPerformanceState(
+            athleteID: athleteID,
+            variationID: variationID,
+            context: context,
+            asOf: now
+        ) {
+            return anchored
+        }
+        return try upsert(
             athleteID: athleteID,
             variationID: variationID,
             mode: mode,
@@ -318,6 +350,20 @@ enum PrescriptionStateService {
             variationID: variationID,
             context: context
         )
+
+        if let existing,
+           !existing.hasValidOwnership(
+               athleteID: athleteID,
+               variationID: variationID
+           ) {
+            return .calibrationRequired(existing)
+        }
+        if let existing, existing.basisKind == .realPerformance {
+            guard let existingMode = existing.mode,
+                  existing.isUsable(for: existingMode) else {
+                return .calibrationRequired(existing)
+            }
+        }
 
         if let history = try PrescriptionHistoryBootstrap.latestEligibleBasis(
             variationID: variationID,
@@ -346,6 +392,29 @@ enum PrescriptionStateService {
             return .ready(existing)
         }
         return .calibrationRequired(existing)
+    }
+
+    private static func authoritativeRealPerformanceState(
+        athleteID: UUID,
+        variationID: UUID,
+        context: ModelContext,
+        asOf date: Date,
+        policy: PrescriptionStalenessPolicy = .v1
+    ) throws -> ExercisePrescriptionState? {
+        guard let existing = try state(
+            athleteID: athleteID,
+            variationID: variationID,
+            context: context
+        ), existing.hasValidOwnership(
+            athleteID: athleteID,
+            variationID: variationID
+        ), existing.basisKind == .realPerformance,
+           let existingMode = existing.mode,
+           existing.isUsable(for: existingMode),
+           !existing.requiresRecalibration(asOf: date, policy: policy) else {
+            return nil
+        }
+        return existing
     }
 
     private static func upsert(

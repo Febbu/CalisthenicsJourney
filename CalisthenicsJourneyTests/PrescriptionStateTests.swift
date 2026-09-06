@@ -201,6 +201,209 @@ final class PrescriptionStateTests: XCTestCase {
         XCTAssertEqual(try context.fetchCount(FetchDescriptor<SetLog>()), 6)
     }
 
+    func testEstimateCannotDowngradeAuthoritativeRealPerformance() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        let now = Date(timeIntervalSince1970: 2_000_000_000)
+        let athlete = AthleteProfile()
+        let variation = ExerciseVariation(name: "Exact", metric: .reps)
+        context.insert(athlete)
+        context.insert(variation)
+        addPerformance(variation: variation, reps: [7, 6, 5], at: now, context: context)
+        try context.save()
+
+        let initialized = try PrescriptionStateService.initializeIfPossible(
+            athleteID: athlete.id,
+            variationID: variation.id,
+            mode: .reps,
+            context: context,
+            asOf: now
+        )
+        guard case let .ready(anchored) = initialized else {
+            return XCTFail("Expected real performance to anchor prescription state")
+        }
+        let anchoredUpdatedAt = anchored.updatedAt
+
+        let result = try PrescriptionStateService.storeEstimate(
+            athleteID: athlete.id,
+            variationID: variation.id,
+            mode: .reps,
+            values: ThreeWorkingSetValues(first: 3, second: 2, third: 1),
+            context: context,
+            now: now.addingTimeInterval(60)
+        )
+
+        XCTAssertEqual(result.id, anchored.id)
+        XCTAssertEqual(result.basisKind, .realPerformance)
+        XCTAssertEqual(result.workingSetValues, ThreeWorkingSetValues(first: 7, second: 6, third: 5))
+        XCTAssertEqual(result.lastRelevantPerformanceAt, now)
+        XCTAssertEqual(result.updatedAt, anchoredUpdatedAt)
+    }
+
+    func testExploratoryCannotDowngradeAuthoritativeRealPerformance() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        let now = Date(timeIntervalSince1970: 2_000_000_000)
+        let athlete = AthleteProfile()
+        let variation = ExerciseVariation(name: "Exact", metric: .seconds)
+        context.insert(athlete)
+        context.insert(variation)
+        addPerformance(variation: variation, seconds: [12, 10, 8], at: now, context: context)
+        try context.save()
+
+        let initialized = try PrescriptionStateService.initializeIfPossible(
+            athleteID: athlete.id,
+            variationID: variation.id,
+            mode: .duration,
+            context: context,
+            asOf: now
+        )
+        guard case let .ready(anchored) = initialized else {
+            return XCTFail("Expected real performance to anchor prescription state")
+        }
+
+        let result = try PrescriptionStateService.storeExploratory(
+            athleteID: athlete.id,
+            variationID: variation.id,
+            mode: .duration,
+            context: context,
+            now: now.addingTimeInterval(60)
+        )
+
+        XCTAssertEqual(result.id, anchored.id)
+        XCTAssertEqual(result.basisKind, .realPerformance)
+        XCTAssertEqual(result.workingSetValues, ThreeWorkingSetValues(first: 12, second: 10, third: 8))
+        XCTAssertEqual(result.lastRelevantPerformanceAt, now)
+    }
+
+    func testRealPerformanceWithoutTimestampRequiresCalibration() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        let now = Date(timeIntervalSince1970: 2_000_000_000)
+        let athlete = AthleteProfile()
+        let variation = ExerciseVariation(name: "Exact", metric: .reps)
+        let malformed = ExercisePrescriptionState(
+            athleteID: athlete.id,
+            variationID: variation.id,
+            mode: .reps,
+            basisKind: .realPerformance,
+            workingSetValues: ThreeWorkingSetValues(first: 7, second: 6, third: 5),
+            now: now
+        )
+        context.insert(athlete)
+        context.insert(variation)
+        context.insert(malformed)
+        addPerformance(variation: variation, reps: [7, 6, 5], at: now, context: context)
+        try context.save()
+
+        let result = try PrescriptionStateService.initializeIfPossible(
+            athleteID: athlete.id,
+            variationID: variation.id,
+            mode: .reps,
+            context: context,
+            asOf: now
+        )
+
+        guard case let .calibrationRequired(existing) = result else {
+            return XCTFail("Malformed real-performance state must not be ready")
+        }
+        XCTAssertEqual(existing?.id, malformed.id)
+        XCTAssertFalse(malformed.isUsable(for: .reps))
+    }
+
+    func testOwnershipIdentityDisagreementRequiresCalibration() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        let now = Date(timeIntervalSince1970: 2_000_000_000)
+        let requestedAthlete = AthleteProfile()
+        let otherAthlete = AthleteProfile()
+        let requestedVariation = ExerciseVariation(name: "Requested", metric: .reps)
+        let otherVariation = ExerciseVariation(name: "Other", metric: .reps)
+        context.insert(requestedAthlete)
+        context.insert(otherAthlete)
+        context.insert(requestedVariation)
+        context.insert(otherVariation)
+
+        let athleteMismatch = ExercisePrescriptionState(
+            athleteID: requestedAthlete.id,
+            variationID: requestedVariation.id,
+            mode: .reps,
+            basisKind: .estimate,
+            workingSetValues: ThreeWorkingSetValues(first: 5, second: 4, third: 3),
+            now: now
+        )
+        athleteMismatch.athleteID = otherAthlete.id
+        context.insert(athleteMismatch)
+
+        let variationMismatch = ExercisePrescriptionState(
+            athleteID: requestedAthlete.id,
+            variationID: otherVariation.id,
+            mode: .reps,
+            basisKind: .estimate,
+            workingSetValues: ThreeWorkingSetValues(first: 5, second: 4, third: 3),
+            now: now
+        )
+        variationMismatch.variationID = requestedVariation.id
+        context.insert(variationMismatch)
+        try context.save()
+
+        let athleteResult = try PrescriptionStateService.initializeIfPossible(
+            athleteID: requestedAthlete.id,
+            variationID: requestedVariation.id,
+            mode: .reps,
+            context: context,
+            asOf: now
+        )
+        let variationResult = try PrescriptionStateService.initializeIfPossible(
+            athleteID: requestedAthlete.id,
+            variationID: otherVariation.id,
+            mode: .reps,
+            context: context,
+            asOf: now
+        )
+
+        guard case let .calibrationRequired(athleteState) = athleteResult,
+              case let .calibrationRequired(variationState) = variationResult else {
+            return XCTFail("Ownership disagreement must not be ready")
+        }
+        XCTAssertEqual(athleteState?.id, athleteMismatch.id)
+        XCTAssertEqual(variationState?.id, variationMismatch.id)
+    }
+
+    func testValidExistingRealPerformanceStateRemainsReady() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        let now = Date(timeIntervalSince1970: 2_000_000_000)
+        let athlete = AthleteProfile()
+        let variation = ExerciseVariation(name: "Exact", metric: .reps)
+        let state = ExercisePrescriptionState(
+            athleteID: athlete.id,
+            variationID: variation.id,
+            mode: .reps,
+            basisKind: .realPerformance,
+            workingSetValues: ThreeWorkingSetValues(first: 7, second: 6, third: 5),
+            lastRelevantPerformanceAt: now,
+            now: now
+        )
+        context.insert(athlete)
+        context.insert(variation)
+        context.insert(state)
+        try context.save()
+
+        let result = try PrescriptionStateService.initializeIfPossible(
+            athleteID: athlete.id,
+            variationID: variation.id,
+            mode: .reps,
+            context: context,
+            asOf: now.addingTimeInterval(60)
+        )
+
+        guard case let .ready(existing) = result else {
+            return XCTFail("Valid real-performance state should remain ready")
+        }
+        XCTAssertEqual(existing.id, state.id)
+    }
+
     func testDifferentVariationHistoryDoesNotInitializeNumericCapacity() throws {
         let container = try makeContainer()
         let context = container.mainContext
