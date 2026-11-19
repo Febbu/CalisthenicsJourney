@@ -7,8 +7,7 @@ struct ActiveWorkoutView: View {
     @Query(sort: \WorkoutSession.startedAt, order: .reverse) private var allSessions: [WorkoutSession]
 
     let session: WorkoutSession
-    @State private var exerciseIndex = 0
-    @State private var showFinished = false
+    @State private var progress = WorkoutSaveProgress()
 
     private var logs: [ExerciseLog] {
         session.exerciseLogs.sorted { $0.orderIndex < $1.orderIndex }
@@ -16,20 +15,21 @@ struct ActiveWorkoutView: View {
 
     var body: some View {
         Group {
-            if logs.indices.contains(exerciseIndex) {
+            if logs.indices.contains(progress.exerciseIndex) {
                 ExerciseEntryView(
-                    log: logs[exerciseIndex],
-                    previousLog: previousLog(for: logs[exerciseIndex]),
-                    isLast: exerciseIndex == logs.count - 1,
+                    log: logs[progress.exerciseIndex],
+                    previousLog: previousLog(for: logs[progress.exerciseIndex]),
+                    isLast: progress.exerciseIndex == logs.count - 1,
+                    saveFailed: progress.saveFailed,
                     onNext: next
                 )
             } else {
                 ContentUnavailableView("No exercises", systemImage: "dumbbell")
             }
         }
-        .navigationTitle("\(exerciseIndex + 1) of \(max(logs.count, 1))")
+        .navigationTitle("\(progress.exerciseIndex + 1) of \(max(logs.count, 1))")
         .navigationBarTitleDisplayMode(.inline)
-        .alert("Workout Complete 🎉", isPresented: $showFinished) {
+        .alert("Workout Complete 🎉", isPresented: $progress.showFinished) {
             Button("Done") { dismiss() }
         } message: {
             Text("Your results are saved and will appear as your previous results next time.")
@@ -46,14 +46,33 @@ struct ActiveWorkoutView: View {
     }
 
     private func next() {
-        try? modelContext.save()
+        progress.advance(session: session, exerciseCount: logs.count, save: modelContext.save)
+    }
+}
 
-        if exerciseIndex < logs.count - 1 {
-            exerciseIndex += 1
-        } else {
-            session.completedAt = .now
-            try? modelContext.save()
-            showFinished = true
+struct WorkoutSaveProgress {
+    private(set) var exerciseIndex = 0
+    private(set) var saveFailed = false
+    var showFinished = false
+
+    mutating func advance(session: WorkoutSession, exerciseCount: Int, save: () throws -> Void) {
+        guard !showFinished else { return }
+        let previousCompletion = session.completedAt
+        do {
+            try save()
+            if exerciseIndex < exerciseCount - 1 {
+                exerciseIndex += 1
+            } else {
+                session.completedAt = previousCompletion ?? .now
+                try save()
+                showFinished = true
+            }
+            saveFailed = false
+        } catch {
+            if session.completedAt != previousCompletion {
+                session.completedAt = previousCompletion
+            }
+            saveFailed = true
         }
     }
 }
@@ -62,6 +81,7 @@ private struct ExerciseEntryView: View {
     let log: ExerciseLog
     let previousLog: ExerciseLog?
     let isLast: Bool
+    let saveFailed: Bool
     let onNext: () -> Void
     
     @FocusState private var inputIsFocused: Bool
@@ -91,8 +111,13 @@ private struct ExerciseEntryView: View {
                     )
                 }
 
+                if saveFailed {
+                    Text("Couldn’t save your workout. Your entries are still here.")
+                        .foregroundStyle(.red)
+                }
+
                 Button(action: onNext) {
-                    Text(isLast ? "Finish Workout" : "Next Exercise")
+                    Text(saveFailed ? "Retry Save" : (isLast ? "Finish Workout" : "Next Exercise"))
                         .font(.headline)
                         .frame(maxWidth: .infinity)
                         .padding()
